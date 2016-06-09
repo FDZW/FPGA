@@ -69,9 +69,17 @@ module system_top (
   iic_scl,
   iic_sda,
 
-  spi_cnv,
-  spi_miso,
-  spi_sclk,
+  spi_0_cnv,
+  spi_0_miso,
+  spi_0_sclk,
+
+  spi_1_cnv,
+  spi_1_miso,
+  spi_1_sclk,
+
+  spi_2_cnv,
+  spi_2_miso,
+  spi_2_sclk,
 
   otg_vbusoc);
 
@@ -103,9 +111,17 @@ module system_top (
   inout           iic_scl;
   inout           iic_sda;
 
-  output          spi_cnv;
-  input           spi_miso;
-  output          spi_sclk;
+  output          spi_0_cnv;
+  input           spi_0_miso;
+  output          spi_0_sclk;
+
+  output          spi_1_cnv;
+  input           spi_1_miso;
+  output          spi_1_sclk;
+
+  output          spi_2_cnv;
+  input           spi_2_miso;
+  output          spi_2_sclk;
 
   input           otg_vbusoc;
 
@@ -150,20 +166,28 @@ module system_top (
     .ps_intr_03 (1'b0),
     .ps_intr_04 (1'b0),
     .ps_intr_05 (1'b0),
-    .ps_intr_06 (1'b0),
-    .ps_intr_07 (1'b0),
-    .ps_intr_08 (1'b0),
-    .ps_intr_09 (1'b0),
     .ps_intr_13 (1'b0),
     .ps_intr_14 (1'b0),
     .ps_intr_15 (1'b0),
     .otg_vbusoc (otg_vbusoc),
-    .spi_adc_cs (),
-    .spi_adc_sclk (spi_sclk),
-    .spi_adc_sdi (spi_miso),
-    .spi_adc_sdo (),
-    .spi_adc_sdo_t (),
-    .spi_cnv (spi_cnv));
+    .spi_adc_0_cs (),
+    .spi_adc_0_sclk (spi_0_sclk),
+    .spi_adc_0_sdi (spi_0_miso),
+    .spi_adc_0_sdo (),
+    .spi_adc_0_sdo_t (),
+    .spi_cnv_0 (spi_0_cnv),
+    .spi_adc_1_cs (),
+    .spi_adc_1_sclk (spi_1_sclk),
+    .spi_adc_1_sdi (spi_1_miso),
+    .spi_adc_1_sdo (),
+    .spi_adc_1_sdo_t (),
+    .spi_cnv_1 (spi_1_cnv),
+    .spi_adc_2_cs (),
+    .spi_adc_2_sclk (spi_2_sclk),
+    .spi_adc_2_sdi (spi_2_miso),
+    .spi_adc_2_sdo (),
+    .spi_adc_2_sdo_t (),
+    .spi_cnv_2 (spi_2_cnv));
 
 
 endmodule
