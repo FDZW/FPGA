@@ -68,6 +68,7 @@ clean:
 	make -C util_mfifo clean
 	make -C util_pmod_adc clean
 	make -C util_pmod_fmeter clean
+	make -C util_pulse_gen clean
 	make -C util_rfifo clean
 	make -C util_sigma_delta_spi clean
 	make -C util_tdd_sync clean
@@ -137,6 +138,7 @@ lib:
 	-make -C util_mfifo
 	-make -C util_pmod_adc
 	-make -C util_pmod_fmeter
+	-make -C util_pulse_gen
 	-make -C util_rfifo
 	-make -C util_sigma_delta_spi
 	-make -C util_tdd_sync
