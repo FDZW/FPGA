@@ -33,6 +33,7 @@ all:
 	-make -C fmcomms6 all
 	-make -C fmcomms7 all
 	-make -C imageon all
+	-make -C machine_health all
 	-make -C motcon2_fmc all
 	-make -C pzsdr all
 	-make -C pzsdr1 all
@@ -67,6 +68,7 @@ clean:
 	make -C fmcomms6 clean
 	make -C fmcomms7 clean
 	make -C imageon clean
+	make -C machine_health clean
 	make -C motcon2_fmc clean
 	make -C pzsdr clean
 	make -C pzsdr1 clean
@@ -101,6 +103,7 @@ clean-all:
 	make -C fmcomms6 clean-all
 	make -C fmcomms7 clean-all
 	make -C imageon clean-all
+	make -C machine_health clean-all
 	make -C motcon2_fmc clean-all
 	make -C pzsdr clean-all
 	make -C pzsdr1 clean-all
