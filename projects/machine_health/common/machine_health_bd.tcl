@@ -50,8 +50,8 @@ for {set i 0} {$i < 3} {incr i} {
 	set_property -dict [list CONFIG.NUM_OF_CS {1}] $util_sigma_delta_spi
 
         set util_cnvst_gen [create_bd_cell -type ip -vlnv analog.com:user:util_pulse_gen:1.0 util_cnvst_gen]
-        set_property -dict [list CONFIG.PULSE_PERIOD  {100}] $util_cnvst_gen
-        set_property -dict [list CONFIG.PULSE_WIDTH  {1}] $util_cnvst_gen
+        set_property -dict [list CONFIG.PULSE_PERIOD  {1000}] $util_cnvst_gen
+        set_property -dict [list CONFIG.PULSE_WIDTH  {4}] $util_cnvst_gen
 
         set axis_width_conv [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_dwidth_converter:1.1 $axis_dwidth_converter]
 
