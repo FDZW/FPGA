@@ -72,14 +72,23 @@ module system_top (
   spi_0_cnv,
   spi_0_miso,
   spi_0_sclk,
+  spi_0_self_test,
+  spi_0_standby,
+  spi_0_over_range,
 
   spi_1_cnv,
   spi_1_miso,
   spi_1_sclk,
+  spi_1_self_test,
+  spi_1_standby,
+  spi_1_over_range,
 
   spi_2_cnv,
   spi_2_miso,
   spi_2_sclk,
+  spi_2_self_test,
+  spi_2_standby,
+  spi_2_over_range,
 
   otg_vbusoc);
 
@@ -114,14 +123,23 @@ module system_top (
   output          spi_0_cnv;
   input           spi_0_miso;
   output          spi_0_sclk;
+  output          spi_0_self_test;
+  output          spi_0_standby;
+  input           spi_0_over_range;
 
   output          spi_1_cnv;
   input           spi_1_miso;
   output          spi_1_sclk;
+  output          spi_1_self_test;
+  output          spi_1_standby;
+  input           spi_1_over_range;
 
   output          spi_2_cnv;
   input           spi_2_miso;
   output          spi_2_sclk;
+  output          spi_2_self_test;
+  output          spi_2_standby;
+  input           spi_2_over_range;
 
   input           otg_vbusoc;
 
@@ -132,6 +150,23 @@ module system_top (
   wire    [63:0]  gpio_t;
 
   // instantiations
+
+  assign gpio_i[32] = gpio_o[32];
+  assign gpio_i[33] = gpio_o[33];
+  assign gpio_i[34] = spi_0_over_range;
+  assign gpio_i[35] = gpio_o[35];
+  assign gpio_i[36] = gpio_o[36];
+  assign gpio_i[37] = spi_1_over_range;
+  assign gpio_i[38] = gpio_o[38];
+  assign gpio_i[39] = gpio_o[39];
+  assign gpio_i[40] = spi_2_over_range;
+
+  assign spi_0_self_test = gpio_o[32];
+  assign spi_0_standby = gpio_o[33];
+  assign spi_1_self_test = gpio_o[35];
+  assign spi_1_standby = gpio_o[36];
+  assign spi_2_self_test = gpio_o[38];
+  assign spi_2_standby = gpio_o[39];
 
   system_wrapper i_system_wrapper (
     .ddr_addr (ddr_addr),
