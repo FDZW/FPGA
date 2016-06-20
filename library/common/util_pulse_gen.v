@@ -43,7 +43,8 @@ module util_pulse_gen (
   clk,
   rstn,
 
-  pulse
+  pulse,
+  end_of_pulse
 );
 
   parameter       PULSE_WIDTH = 7;
@@ -52,12 +53,14 @@ module util_pulse_gen (
   input           clk;
   input           rstn;
   output          pulse;
+  output          end_of_pulse;
 
   // internal registers
 
   reg     [(PULSE_WIDTH-1):0]  pulse_width_cnt = {PULSE_WIDTH{1'b1}};
   reg     [31:0]               pulse_period_cnt = 32'h0;
   reg                          pulse =  1'b0;
+  reg                          end_of_pulse = 1'b0;
 
   wire                         end_of_period_s;
 
@@ -81,10 +84,12 @@ module util_pulse_gen (
       pulse <= 0;
     end else begin
       pulse_width_cnt <= (pulse == 1'b1) ? pulse_width_cnt + 1 : {PULSE_WIDTH{1'h0}};
+      end_of_pulse <= 1'b0;
       if(end_of_period_s == 1'b1) begin
         pulse <= 1'b1;
       end else if(pulse_width_cnt == {PULSE_WIDTH{1'b1}}) begin
         pulse <= 1'b0;
+        end_of_pulse <= 1'b1;
       end
     end
   end
