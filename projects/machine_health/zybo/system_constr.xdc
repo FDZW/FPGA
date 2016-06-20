@@ -1,7 +1,7 @@
 # TMP4
 
-set_property -dict  {PACKAGE_PIN J15 IOSTANDARD LVCMOS33}    [get_ports  iic_scl]  ; ## JE3
-set_property -dict  {PACKAGE_PIN H15 IOSTANDARD LVCMOS33}    [get_ports  iic_sda]  ; ## JE4
+set_property -dict  {PACKAGE_PIN J15 IOSTANDARD LVCMOS33 PULLTYPE PULLUP}    [get_ports  iic_scl]  ; ## JE3
+set_property -dict  {PACKAGE_PIN H15 IOSTANDARD LVCMOS33 PULLTYPE PULLUP}    [get_ports  iic_sda]  ; ## JE4
 
 # AD7980_0
 
