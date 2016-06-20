@@ -29,12 +29,10 @@ for {set i 0} {$i < 3} {incr i} {
         set execution "execution_$i"
         set offload "offload_$i"
         set interconnect "interconnect_$i"
-        set util_spi "util_sigma_delta_spi_$i"
         set axis_dwidth_converter "axis_dwidth_converter_$i"
 
 	create_bd_pin -dir I -type clk clk
 	create_bd_pin -dir I -type rst resetn
-	create_bd_pin -dir O conv_done
         create_bd_pin -dir O conv_start
 	create_bd_pin -dir O irq
 	create_bd_intf_pin -mode Master -vlnv analog.com:interface:spi_master_rtl:1.0 m_spi
@@ -46,12 +44,10 @@ for {set i 0} {$i < 3} {incr i} {
 	set axi_spi_engine [create_bd_cell -type ip -vlnv analog.com:user:axi_spi_engine:1.0 $axi]
 	set spi_engine_offload [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_offload:1.0 $offload]
 	set spi_engine_interconnect [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_interconnect:1.0 $interconnect]
-	set util_sigma_delta_spi [create_bd_cell -type ip -vlnv analog.com:user:util_sigma_delta_spi:1.0 $util_spi]
-	set_property -dict [list CONFIG.NUM_OF_CS {1}] $util_sigma_delta_spi
 
         set util_cnvst_gen [create_bd_cell -type ip -vlnv analog.com:user:util_pulse_gen:1.0 util_cnvst_gen]
         set_property -dict [list CONFIG.PULSE_PERIOD  {1000}] $util_cnvst_gen
-        set_property -dict [list CONFIG.PULSE_WIDTH  {4}] $util_cnvst_gen
+        set_property -dict [list CONFIG.PULSE_WIDTH  {7}] $util_cnvst_gen
 
         set axis_width_conv [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_dwidth_converter:1.1 $axis_dwidth_converter]
 
@@ -62,12 +58,9 @@ for {set i 0} {$i < 3} {incr i} {
 	ad_connect $offload/offload_sdi $axis_dwidth_converter/S_AXIS
         ad_connect $axis_dwidth_converter/M_AXIS M_AXIS_SAMPLE
 
-	ad_connect $util_spi/data_ready $offload/trigger
-	ad_connect $util_spi/data_ready conv_done
+	ad_connect util_cnvst_gen/end_of_pulse $offload/trigger
 
-	ad_connect $execution/active $util_spi/spi_active
-	ad_connect $execution/spi $util_spi/s_spi
-	ad_connect m_spi $util_spi/m_spi
+	ad_connect $execution/spi m_spi
 
 	ad_connect clk $offload/spi_clk
 	ad_connect clk $offload/ctrl_clk
@@ -75,7 +68,6 @@ for {set i 0} {$i < 3} {incr i} {
 	ad_connect clk $axi/s_axi_aclk
 	ad_connect clk $axi/spi_clk
 	ad_connect clk $interconnect/clk
-	ad_connect clk $util_spi/clk
         ad_connect clk $axis_dwidth_converter/aclk
         ad_connect clk util_cnvst_gen/clk
 
@@ -84,7 +76,6 @@ for {set i 0} {$i < 3} {incr i} {
         ad_connect $axi/spi_resetn $axis_dwidth_converter/aresetn
 	ad_connect $axi/spi_resetn $execution/resetn
 	ad_connect $axi/spi_resetn $interconnect/resetn
-	ad_connect $axi/spi_resetn $util_spi/resetn
         ad_connect $axi/spi_resetn util_cnvst_gen/rstn
 
         ad_connect conv_start util_cnvst_gen/pulse
