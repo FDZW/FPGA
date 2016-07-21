@@ -25,11 +25,12 @@ for {set i 0} {$i < 3} {incr i} {
   create_bd_cell -type hier spi_$i
   current_bd_instance /spi_$i
 
-    set axi "axi_$i"
-    set execution "execution_$i"
-    set offload "offload_$i"
-    set interconnect "interconnect_$i"
-    set axis_dwidth_converter "axis_dwidth_converter_$i"
+    set spi_axi "spi_axi_$i"
+    set execution "spi_execution_$i"
+    set offload "spi_offload_$i"
+    set interconnect "spi_interconnect_$i"
+    set axis_dwidth_converter "spi_axis_dwidth_converter_$i"
+    set pulse_axi "pulse_axi_$i"
 
     create_bd_pin -dir I -type clk clk
     create_bd_pin -dir I -type rst resetn
@@ -41,46 +42,45 @@ for {set i 0} {$i < 3} {incr i} {
     set spi_engine [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_execution:1.0 $execution]
     set_property -dict [list CONFIG.NUM_OF_CS {1}] $spi_engine
 
-    set axi_spi_engine [create_bd_cell -type ip -vlnv analog.com:user:axi_spi_engine:1.0 $axi]
+    set axi_spi_engine [create_bd_cell -type ip -vlnv analog.com:user:axi_spi_engine:1.0 $spi_axi]
     set spi_engine_offload [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_offload:1.0 $offload]
     set spi_engine_interconnect [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_interconnect:1.0 $interconnect]
 
-    set util_cnvst_gen [create_bd_cell -type ip -vlnv analog.com:user:util_pulse_gen:1.0 util_cnvst_gen]
-    set_property -dict [list CONFIG.PULSE_PERIOD  {1000}] $util_cnvst_gen
-    set_property -dict [list CONFIG.PULSE_WIDTH  {7}] $util_cnvst_gen
+    set axi_cnvst_gen [create_bd_cell -type ip -vlnv analog.com:user:axi_pulse_gen:1.0 $pulse_axi]
+    set_property -dict [list CONFIG.ID $i] $axi_cnvst_gen
 
     set axis_width_conv [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_dwidth_converter:1.1 $axis_dwidth_converter]
 
-    ad_connect $axi/spi_engine_offload_ctrl0 $offload/spi_engine_offload_ctrl
+    ad_connect $spi_axi/spi_engine_offload_ctrl0 $offload/spi_engine_offload_ctrl
     ad_connect $offload/spi_engine_ctrl $interconnect/s0_ctrl
-    ad_connect $axi/spi_engine_ctrl $interconnect/s1_ctrl
+    ad_connect $spi_axi/spi_engine_ctrl $interconnect/s1_ctrl
     ad_connect $interconnect/m_ctrl $execution/ctrl
     ad_connect $offload/offload_sdi $axis_dwidth_converter/S_AXIS
     ad_connect $axis_dwidth_converter/M_AXIS M_AXIS_SAMPLE
 
-    ad_connect util_cnvst_gen/end_of_pulse $offload/trigger
+    ad_connect $pulse_axi/end_of_pulse $offload/trigger
 
     ad_connect $execution/spi m_spi
 
     ad_connect clk $offload/spi_clk
     ad_connect clk $offload/ctrl_clk
     ad_connect clk $execution/clk
-    ad_connect clk $axi/s_axi_aclk
-    ad_connect clk $axi/spi_clk
+    ad_connect clk $spi_axi/s_axi_aclk
+    ad_connect clk $spi_axi/spi_clk
+    ad_connect clk $pulse_axi/s_axi_aclk
     ad_connect clk $interconnect/clk
     ad_connect clk $axis_dwidth_converter/aclk
-    ad_connect clk util_cnvst_gen/clk
 
-    ad_connect resetn $axi/s_axi_aresetn
-    ad_connect $axi/spi_resetn $offload/spi_resetn
-    ad_connect $axi/spi_resetn $axis_dwidth_converter/aresetn
-    ad_connect $axi/spi_resetn $execution/resetn
-    ad_connect $axi/spi_resetn $interconnect/resetn
-    ad_connect $axi/spi_resetn util_cnvst_gen/rstn
+    ad_connect resetn $spi_axi/s_axi_aresetn
+    ad_connect resetn $pulse_axi/s_axi_aresetn
+    ad_connect $spi_axi/spi_resetn $offload/spi_resetn
+    ad_connect $spi_axi/spi_resetn $axis_dwidth_converter/aresetn
+    ad_connect $spi_axi/spi_resetn $execution/resetn
+    ad_connect $spi_axi/spi_resetn $interconnect/resetn
 
-    ad_connect conv_start util_cnvst_gen/pulse
+    ad_connect conv_start $pulse_axi/pulse
 
-    ad_connect irq $axi/irq
+    ad_connect irq $spi_axi/irq
 
   current_bd_instance /
 
@@ -133,9 +133,12 @@ ad_cpu_interconnect 0x43C00000 axi_iic_tmp4
 ad_cpu_interconnect 0x43C10000 axi_dma_0
 ad_cpu_interconnect 0x43C20000 axi_dma_1
 ad_cpu_interconnect 0x43C30000 axi_dma_2
-ad_cpu_interconnect 0x43C40000 spi_0/axi_0
-ad_cpu_interconnect 0x43C50000 spi_1/axi_1
-ad_cpu_interconnect 0x43C60000 spi_2/axi_2
+ad_cpu_interconnect 0x43C40000 spi_0/spi_axi_0
+ad_cpu_interconnect 0x43C50000 spi_1/spi_axi_1
+ad_cpu_interconnect 0x43C60000 spi_2/spi_axi_2
+ad_cpu_interconnect 0x43C70000 spi_0/pulse_axi_0
+ad_cpu_interconnect 0x43C80000 spi_1/pulse_axi_1
+ad_cpu_interconnect 0x43C90000 spi_2/pulse_axi_2
 
 ad_mem_hp0_interconnect sys_cpu_clk sys_ps7/S_AXI_HP0
 ad_mem_hp0_interconnect sys_cpu_clk axi_dma_0/m_dest_axi
