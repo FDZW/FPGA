@@ -25,62 +25,62 @@ for {set i 0} {$i < 3} {incr i} {
   create_bd_cell -type hier spi_$i
   current_bd_instance /spi_$i
 
-        set axi "axi_$i"
-        set execution "execution_$i"
-        set offload "offload_$i"
-        set interconnect "interconnect_$i"
-        set axis_dwidth_converter "axis_dwidth_converter_$i"
+    set axi "axi_$i"
+    set execution "execution_$i"
+    set offload "offload_$i"
+    set interconnect "interconnect_$i"
+    set axis_dwidth_converter "axis_dwidth_converter_$i"
 
-	create_bd_pin -dir I -type clk clk
-	create_bd_pin -dir I -type rst resetn
-        create_bd_pin -dir O conv_start
-	create_bd_pin -dir O irq
-	create_bd_intf_pin -mode Master -vlnv analog.com:interface:spi_master_rtl:1.0 m_spi
-	create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:axis_rtl:1.0 M_AXIS_SAMPLE
+    create_bd_pin -dir I -type clk clk
+    create_bd_pin -dir I -type rst resetn
+    create_bd_pin -dir O conv_start
+    create_bd_pin -dir O irq
+    create_bd_intf_pin -mode Master -vlnv analog.com:interface:spi_master_rtl:1.0 m_spi
+    create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:axis_rtl:1.0 M_AXIS_SAMPLE
 
-	set spi_engine [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_execution:1.0 $execution]
-	set_property -dict [list CONFIG.NUM_OF_CS {1}] $spi_engine
+    set spi_engine [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_execution:1.0 $execution]
+    set_property -dict [list CONFIG.NUM_OF_CS {1}] $spi_engine
 
-	set axi_spi_engine [create_bd_cell -type ip -vlnv analog.com:user:axi_spi_engine:1.0 $axi]
-	set spi_engine_offload [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_offload:1.0 $offload]
-	set spi_engine_interconnect [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_interconnect:1.0 $interconnect]
+    set axi_spi_engine [create_bd_cell -type ip -vlnv analog.com:user:axi_spi_engine:1.0 $axi]
+    set spi_engine_offload [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_offload:1.0 $offload]
+    set spi_engine_interconnect [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_interconnect:1.0 $interconnect]
 
-        set util_cnvst_gen [create_bd_cell -type ip -vlnv analog.com:user:util_pulse_gen:1.0 util_cnvst_gen]
-        set_property -dict [list CONFIG.PULSE_PERIOD  {1000}] $util_cnvst_gen
-        set_property -dict [list CONFIG.PULSE_WIDTH  {7}] $util_cnvst_gen
+    set util_cnvst_gen [create_bd_cell -type ip -vlnv analog.com:user:util_pulse_gen:1.0 util_cnvst_gen]
+    set_property -dict [list CONFIG.PULSE_PERIOD  {1000}] $util_cnvst_gen
+    set_property -dict [list CONFIG.PULSE_WIDTH  {7}] $util_cnvst_gen
 
-        set axis_width_conv [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_dwidth_converter:1.1 $axis_dwidth_converter]
+    set axis_width_conv [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_dwidth_converter:1.1 $axis_dwidth_converter]
 
-	ad_connect $axi/spi_engine_offload_ctrl0 $offload/spi_engine_offload_ctrl
-	ad_connect $offload/spi_engine_ctrl $interconnect/s0_ctrl
-	ad_connect $axi/spi_engine_ctrl $interconnect/s1_ctrl
-	ad_connect $interconnect/m_ctrl $execution/ctrl
-	ad_connect $offload/offload_sdi $axis_dwidth_converter/S_AXIS
-        ad_connect $axis_dwidth_converter/M_AXIS M_AXIS_SAMPLE
+    ad_connect $axi/spi_engine_offload_ctrl0 $offload/spi_engine_offload_ctrl
+    ad_connect $offload/spi_engine_ctrl $interconnect/s0_ctrl
+    ad_connect $axi/spi_engine_ctrl $interconnect/s1_ctrl
+    ad_connect $interconnect/m_ctrl $execution/ctrl
+    ad_connect $offload/offload_sdi $axis_dwidth_converter/S_AXIS
+    ad_connect $axis_dwidth_converter/M_AXIS M_AXIS_SAMPLE
 
-	ad_connect util_cnvst_gen/end_of_pulse $offload/trigger
+    ad_connect util_cnvst_gen/end_of_pulse $offload/trigger
 
-	ad_connect $execution/spi m_spi
+    ad_connect $execution/spi m_spi
 
-	ad_connect clk $offload/spi_clk
-	ad_connect clk $offload/ctrl_clk
-	ad_connect clk $execution/clk
-	ad_connect clk $axi/s_axi_aclk
-	ad_connect clk $axi/spi_clk
-	ad_connect clk $interconnect/clk
-        ad_connect clk $axis_dwidth_converter/aclk
-        ad_connect clk util_cnvst_gen/clk
+    ad_connect clk $offload/spi_clk
+    ad_connect clk $offload/ctrl_clk
+    ad_connect clk $execution/clk
+    ad_connect clk $axi/s_axi_aclk
+    ad_connect clk $axi/spi_clk
+    ad_connect clk $interconnect/clk
+    ad_connect clk $axis_dwidth_converter/aclk
+    ad_connect clk util_cnvst_gen/clk
 
-        ad_connect resetn $axi/s_axi_aresetn
-	ad_connect $axi/spi_resetn $offload/spi_resetn
-        ad_connect $axi/spi_resetn $axis_dwidth_converter/aresetn
-	ad_connect $axi/spi_resetn $execution/resetn
-	ad_connect $axi/spi_resetn $interconnect/resetn
-        ad_connect $axi/spi_resetn util_cnvst_gen/rstn
+    ad_connect resetn $axi/s_axi_aresetn
+    ad_connect $axi/spi_resetn $offload/spi_resetn
+    ad_connect $axi/spi_resetn $axis_dwidth_converter/aresetn
+    ad_connect $axi/spi_resetn $execution/resetn
+    ad_connect $axi/spi_resetn $interconnect/resetn
+    ad_connect $axi/spi_resetn util_cnvst_gen/rstn
 
-        ad_connect conv_start util_cnvst_gen/pulse
+    ad_connect conv_start util_cnvst_gen/pulse
 
-	ad_connect irq $axi/irq
+    ad_connect irq $axi/irq
 
   current_bd_instance /
 
