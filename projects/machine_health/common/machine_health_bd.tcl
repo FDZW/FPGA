@@ -34,7 +34,7 @@ for {set i 0} {$i < 3} {incr i} {
 
     create_bd_pin -dir I -type clk clk
     create_bd_pin -dir I -type rst resetn
-    create_bd_pin -dir O conv_start
+    create_bd_pin -dir I end_of_pulse
     create_bd_pin -dir O irq
     create_bd_intf_pin -mode Master -vlnv analog.com:interface:spi_master_rtl:1.0 m_spi
     create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:axis_rtl:1.0 M_AXIS_SAMPLE
@@ -46,9 +46,6 @@ for {set i 0} {$i < 3} {incr i} {
     set spi_engine_offload [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_offload:1.0 $offload]
     set spi_engine_interconnect [create_bd_cell -type ip -vlnv analog.com:user:spi_engine_interconnect:1.0 $interconnect]
 
-    set axi_cnvst_gen [create_bd_cell -type ip -vlnv analog.com:user:axi_pulse_gen:1.0 $pulse_axi]
-    set_property -dict [list CONFIG.ID $i] $axi_cnvst_gen
-
     set axis_width_conv [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_dwidth_converter:1.1 $axis_dwidth_converter]
 
     ad_connect $spi_axi/spi_engine_offload_ctrl0 $offload/spi_engine_offload_ctrl
@@ -58,7 +55,7 @@ for {set i 0} {$i < 3} {incr i} {
     ad_connect $offload/offload_sdi $axis_dwidth_converter/S_AXIS
     ad_connect $axis_dwidth_converter/M_AXIS M_AXIS_SAMPLE
 
-    ad_connect $pulse_axi/end_of_pulse $offload/trigger
+    ad_connect end_of_pulse $offload/trigger
 
     ad_connect $execution/spi m_spi
 
@@ -67,18 +64,14 @@ for {set i 0} {$i < 3} {incr i} {
     ad_connect clk $execution/clk
     ad_connect clk $spi_axi/s_axi_aclk
     ad_connect clk $spi_axi/spi_clk
-    ad_connect clk $pulse_axi/s_axi_aclk
     ad_connect clk $interconnect/clk
     ad_connect clk $axis_dwidth_converter/aclk
 
     ad_connect resetn $spi_axi/s_axi_aresetn
-    ad_connect resetn $pulse_axi/s_axi_aresetn
     ad_connect $spi_axi/spi_resetn $offload/spi_resetn
     ad_connect $spi_axi/spi_resetn $axis_dwidth_converter/aresetn
     ad_connect $spi_axi/spi_resetn $execution/resetn
     ad_connect $spi_axi/spi_resetn $interconnect/resetn
-
-    ad_connect conv_start $pulse_axi/pulse
 
     ad_connect irq $spi_axi/irq
 
@@ -101,6 +94,10 @@ for {set i 0} {$i < 3} {incr i} {
 
 }
 
+# instantiate the convertion start generator
+
+set axi_cnvst_gen [create_bd_cell -type ip -vlnv analog.com:user:axi_pulse_gen:1.0 axi_cnvst_gen]
+
 # clock and resets
 
 ad_connect  sys_cpu_clk spi_0/clk
@@ -116,9 +113,12 @@ ad_connect  sys_cpu_resetn spi_2/resetn
 ad_connect  spi_adc_0 spi_0/m_spi
 ad_connect  spi_adc_1 spi_1/m_spi
 ad_connect  spi_adc_2 spi_2/m_spi
-ad_connect  spi_cnv_0 spi_0/conv_start
-ad_connect  spi_cnv_1 spi_1/conv_start
-ad_connect  spi_cnv_2 spi_2/conv_start
+ad_connect  spi_cnv_0 axi_cnvst_gen/pulse
+ad_connect  spi_cnv_1 axi_cnvst_gen/pulse
+ad_connect  spi_cnv_2 axi_cnvst_gen/pulse
+ad_connect  axi_cnvst_gen/end_of_pulse spi_0/end_of_pulse
+ad_connect  axi_cnvst_gen/end_of_pulse spi_1/end_of_pulse
+ad_connect  axi_cnvst_gen/end_of_pulse spi_2/end_of_pulse
 
 # interface connections
 
@@ -136,9 +136,7 @@ ad_cpu_interconnect 0x43C30000 axi_dma_2
 ad_cpu_interconnect 0x43C40000 spi_0/spi_axi_0
 ad_cpu_interconnect 0x43C50000 spi_1/spi_axi_1
 ad_cpu_interconnect 0x43C60000 spi_2/spi_axi_2
-ad_cpu_interconnect 0x43C70000 spi_0/pulse_axi_0
-ad_cpu_interconnect 0x43C80000 spi_1/pulse_axi_1
-ad_cpu_interconnect 0x43C90000 spi_2/pulse_axi_2
+ad_cpu_interconnect 0x43C70000 axi_cnvst_gen
 
 ad_mem_hp0_interconnect sys_cpu_clk sys_ps7/S_AXI_HP0
 ad_mem_hp0_interconnect sys_cpu_clk axi_dma_0/m_dest_axi
