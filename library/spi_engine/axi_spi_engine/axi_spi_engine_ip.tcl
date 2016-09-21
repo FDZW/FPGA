@@ -56,4 +56,7 @@ adi_add_bus "spi_engine_offload_ctrl0" "master" \
 
 adi_add_bus_clock "s_axi_aclk" "spi_engine_offload_ctrl0:s_axi" "s_axi_aresetn"
 
+adi_set_bus_dependency "spi_engine_offload_ctrl0" "spi_engine_offload_ctrl0" \
+	"(spirit:decode(id('MODELPARAM_VALUE.NUM_OFFLOAD')) > 0)"
+
 ipx::save_core [ipx::current_core]
