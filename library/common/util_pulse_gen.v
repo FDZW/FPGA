@@ -38,28 +38,33 @@
 // ***************************************************************************
 `timescale 1ns/1ps
 
-module util_pulse_gen (
+module util_pulse_gen #(
 
-  clk,
-  rstn,
+  parameter   PULSE_WIDTH = 7,
+  parameter   PULSE_PERIOD = 100000000)(         // t_period * clk_freq
 
-  pulse
+  input               clk,
+  input               rstn,
+
+  input       [31:0]  pulse_period,
+  input               pulse_period_en,
+
+  output  reg         pulse
 );
-
-  parameter       PULSE_WIDTH = 7;
-  parameter       PULSE_PERIOD = 100000000; // t_period * clk_freq
-
-  input           clk;
-  input           rstn;
-  output          pulse;
 
   // internal registers
 
   reg     [(PULSE_WIDTH-1):0]  pulse_width_cnt = {PULSE_WIDTH{1'b1}};
   reg     [31:0]               pulse_period_cnt = 32'h0;
-  reg                          pulse =  1'b0;
+  reg     [31:0]               pulse_period_d = 32'b0;
 
   wire                         end_of_period_s;
+
+  // flop the desired period
+
+  always @(posedge clk) begin
+    pulse_period_d <= (pulse_period_en) ? pulse_period : PULSE_PERIOD;
+  end
 
   // a free running pulse generator
 
@@ -67,11 +72,11 @@ module util_pulse_gen (
     if (rstn == 1'b0) begin
       pulse_period_cnt <= 32'h0;
     end else begin
-      pulse_period_cnt <= (pulse_period_cnt < PULSE_PERIOD) ? (pulse_period_cnt + 1) : 32'b0;
+      pulse_period_cnt <= (pulse_period_cnt < pulse_period) ? (pulse_period_cnt + 1) : 32'b0;
     end
   end
 
-  assign  end_of_period_s = (pulse_period_cnt == (PULSE_PERIOD - 1)) ? 1'b1 : 1'b0;
+  assign  end_of_period_s = (pulse_period_cnt == (pulse_period - 1)) ? 1'b1 : 1'b0;
 
   // generate pulse with a specified width
 
