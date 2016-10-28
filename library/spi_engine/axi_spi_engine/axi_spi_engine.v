@@ -1,3 +1,4 @@
+`timescale 1ns/100ps
 
 module axi_spi_engine (
         // Slave AXI interface
@@ -40,6 +41,7 @@ module axi_spi_engine (
         output reg irq,
 
         // SPI signals
+
         input spi_clk,
 
         output spi_resetn,
@@ -61,6 +63,7 @@ module axi_spi_engine (
         input [7:0] sync_data,
 
         // Offload ctrl signals
+
         output offload0_cmd_wr_en,
         output [15:0] offload0_cmd_wr_data,
 
@@ -311,7 +314,7 @@ endgenerate
 `define axi_spi_engine_check_watermark(x, n) \
         (x[n] == 1'b1 || x[n-1:n-2] == 2'b11)
 
-assign cmd_fifo_in_valid = up_wreq == 1'b1 && up_waddr == 8'h38;
+assign cmd_fifo_in_valid = up_wreq == 1'b1 && up_waddr_s == 8'h38;
 assign cmd_fifo_in_data = up_wdata_s[15:0];
 assign cmd_fifo_almost_empty =
         `axi_spi_engine_check_watermark(cmd_fifo_room, CMD_FIFO_ADDRESS_WIDTH);
