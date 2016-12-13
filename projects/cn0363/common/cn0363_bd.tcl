@@ -56,8 +56,9 @@ current_bd_instance /spi
 	set util_sigma_delta_spi [create_bd_cell -type ip -vlnv analog.com:user:util_sigma_delta_spi:1.0 util_sigma_delta_spi]
 
 	set_property -dict [list CONFIG.NUM_OF_CS 2] $spi_engine
-
 	set_property -dict [list CONFIG.NUM_OF_CS 2] $util_sigma_delta_spi
+	set_property -dict [list CONFIG.NUM_OF_SDI 2] $spi_engine_interconnect
+	set_property -dict [list CONFIG.NUM_OFFLOAD 1] $axi_spi_engine
 
 	ad_connect axi/spi_engine_offload_ctrl0 offload/spi_engine_offload_ctrl
 	ad_connect offload/spi_engine_ctrl interconnect/s0_ctrl
