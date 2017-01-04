@@ -43,4 +43,11 @@ adi_add_bus "spi" "master" \
 	}
 adi_add_bus_clock "clk" "spi" "resetn"
 
+adi_set_ports_dependency "sdi_1" \
+      "(spirit:decode(id('MODELPARAM_VALUE.NUM_OF_SDI')) > 1)"
+adi_set_ports_dependency "sdi_2" \
+      "(spirit:decode(id('MODELPARAM_VALUE.NUM_OF_SDI')) > 2)"
+adi_set_ports_dependency "sdi_3" \
+      "(spirit:decode(id('MODELPARAM_VALUE.NUM_OF_SDI')) > 3)"
+
 ipx::save_core [ipx::current_core]
