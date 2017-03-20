@@ -4,7 +4,9 @@ load_package flow
 source ../../scripts/adi_env.tcl
 project_new adrv9371x_a10soc -overwrite
 
-source "../../common/a10soc/a10soc_system_assign.tcl"
+source $ad_hdl_dir/projects/common/a10soc/a10soc_system_assign.tcl
+source $ad_hdl_dir/projects/common/a10soc/a10soc_plddr4_assign.tcl
+source $ad_hdl_dir/projects/common/altera/sys_gen.tcl
 
 set_global_assignment -name QSYS_FILE system_bd.qsys
 set_global_assignment -name VERILOG_FILE system_top.v
@@ -33,6 +35,11 @@ set_location_assignment PIN_N37   -to tx_data[2]            ; ## C02  FMC_HPC_DP
 set_location_assignment PIN_N36   -to "tx_data[2](n)"       ; ## C03  FMC_HPC_DP0_C2M_N (tx_data_n[1])
 set_location_assignment PIN_K39   -to tx_data[3]            ; ## A30  FMC_HPC_DP3_C2M_P (tx_data_p[2])
 set_location_assignment PIN_K38   -to "tx_data[3](n)"       ; ## A31  FMC_HPC_DP3_C2M_N (tx_data_n[2])
+
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to ref_clk0
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to ref_clk1
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to rx_data
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to tx_data
 
 set_instance_assignment -name IO_STANDARD LVDS -to ref_clk0
 set_instance_assignment -name IO_STANDARD LVDS -to ref_clk1
@@ -71,8 +78,8 @@ set_instance_assignment -name IO_STANDARD LVDS -to sysref
 set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to tx_sync
 set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to sysref
 
-set_location_assignment PIN_A12   -to spi_csn_ad9528        ; ## D15  FMC_HPC_LA09_N
-set_location_assignment PIN_A13   -to spi_csn_ad9371        ; ## D14  FMC_HPC_LA09_P
+set_location_assignment PIN_A13   -to spi_csn_ad9528        ; ## D15  FMC_HPC_LA09_N
+set_location_assignment PIN_A12   -to spi_csn_ad9371        ; ## D14  FMC_HPC_LA09_P
 set_location_assignment PIN_A9    -to spi_clk               ; ## H13  FMC_HPC_LA07_P
 set_location_assignment PIN_B9    -to spi_mosi              ; ## H14  FMC_HPC_LA07_N
 set_location_assignment PIN_B11   -to spi_miso              ; ## G12  FMC_HPC_LA08_P

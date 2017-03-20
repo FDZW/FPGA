@@ -5,15 +5,15 @@
 ####################################################################################
 ####################################################################################
 
-M_DEPS := axi_clkgen_ip.tcl
-M_DEPS += ../scripts/adi_env.tcl
-M_DEPS += ../scripts/adi_ip.tcl
 M_DEPS += ../common/ad_rst.v
-M_DEPS += ../common/ad_mmcm_drp.v
 M_DEPS += ../common/up_axi.v
 M_DEPS += ../common/up_clkgen.v
-M_DEPS += axi_clkgen_constr.xdc
+M_DEPS += ../scripts/adi_env.tcl
+M_DEPS += ../scripts/adi_ip.tcl
+M_DEPS += ../xilinx/common/ad_mmcm_drp.v
 M_DEPS += axi_clkgen.v
+M_DEPS += axi_clkgen_constr.xdc
+M_DEPS += axi_clkgen_ip.tcl
 
 M_VIVADO := vivado -mode batch -source
 
@@ -44,7 +44,7 @@ clean-all:
 
 
 axi_clkgen.xpr: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_VIVADO) axi_clkgen_ip.tcl  >> axi_clkgen_ip.log 2>&1
 
 ####################################################################################

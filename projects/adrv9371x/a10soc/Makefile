@@ -5,14 +5,30 @@
 ####################################################################################
 ####################################################################################
 
+ifeq ($(MMU),)
+  MMU := 1
+endif
+
+export ALT_NIOS_MMU_ENABLED := $(MMU)
+
 M_DEPS += system_top.v
+M_DEPS += system_qsys.tcl
 M_DEPS += system_project.tcl
 M_DEPS += system_constr.sdc
-M_DEPS += system_bd.qsys
-M_DEPS += ../common/adrv9371x_bd.qsys
+M_DEPS += ../common/adrv9371x_qsys.tcl
+M_DEPS += ../../scripts/adi_tquest.tcl
 M_DEPS += ../../scripts/adi_env.tcl
-M_DEPS += ../../common/a10soc/a10soc_system_bd.qsys
+M_DEPS += ../../common/altera/sys_gen.tcl
+M_DEPS += ../../common/a10soc/a10soc_system_qsys.tcl
 M_DEPS += ../../common/a10soc/a10soc_system_assign.tcl
+M_DEPS += ../../../library/altera/avl_adxcfg/avl_adxcfg.v
+M_DEPS += ../../../library/altera/avl_adxcfg/avl_adxcfg_hw.tcl
+M_DEPS += ../../../library/altera/avl_adxcvr/avl_adxcvr_hw.tcl
+M_DEPS += ../../../library/altera/axi_adxcvr/axi_adxcvr.v
+M_DEPS += ../../../library/altera/axi_adxcvr/axi_adxcvr_hw.tcl
+M_DEPS += ../../../library/altera/axi_adxcvr/axi_adxcvr_up.v
+M_DEPS += ../../../library/altera/common/ad_dcfilter.v
+M_DEPS += ../../../library/altera/common/ad_mul.v
 M_DEPS += ../../../library/axi_ad9371/axi_ad9371.v
 M_DEPS += ../../../library/axi_ad9371/axi_ad9371_hw.tcl
 M_DEPS += ../../../library/axi_ad9371/axi_ad9371_if.v
@@ -24,6 +40,7 @@ M_DEPS += ../../../library/axi_ad9371/axi_ad9371_tx_channel.v
 M_DEPS += ../../../library/axi_dmac/2d_transfer.v
 M_DEPS += ../../../library/axi_dmac/address_generator.v
 M_DEPS += ../../../library/axi_dmac/axi_dmac.v
+M_DEPS += ../../../library/axi_dmac/axi_dmac_constr.sdc
 M_DEPS += ../../../library/axi_dmac/axi_dmac_hw.tcl
 M_DEPS += ../../../library/axi_dmac/axi_register_slice.v
 M_DEPS += ../../../library/axi_dmac/data_mover.v
@@ -40,19 +57,16 @@ M_DEPS += ../../../library/axi_dmac/splitter.v
 M_DEPS += ../../../library/axi_dmac/src_axi_mm.v
 M_DEPS += ../../../library/axi_dmac/src_axi_stream.v
 M_DEPS += ../../../library/axi_dmac/src_fifo_inf.v
-M_DEPS += ../../../library/axi_jesd_xcvr/axi_jesd_xcvr.v
-M_DEPS += ../../../library/axi_jesd_xcvr/axi_jesd_xcvr_hw.tcl
+M_DEPS += ../../../library/common/ad_axi_ip_constr.sdc
+M_DEPS += ../../../library/common/ad_axis_inf_rx.v
 M_DEPS += ../../../library/common/ad_datafmt.v
-M_DEPS += ../../../library/common/ad_dcfilter.v
 M_DEPS += ../../../library/common/ad_dds.v
 M_DEPS += ../../../library/common/ad_dds_1.v
 M_DEPS += ../../../library/common/ad_dds_sine.v
 M_DEPS += ../../../library/common/ad_iqcor.v
-M_DEPS += ../../../library/common/ad_jesd_align.v
-M_DEPS += ../../../library/common/ad_mul.v
+M_DEPS += ../../../library/common/ad_mem_asym.v
 M_DEPS += ../../../library/common/ad_rst.v
-M_DEPS += ../../../library/common/altera/DSP48E1.v
-M_DEPS += ../../../library/common/altera/MULT_MACRO.v
+M_DEPS += ../../../library/common/ad_xcvr_rx_if.v
 M_DEPS += ../../../library/common/sync_bits.v
 M_DEPS += ../../../library/common/sync_gray.v
 M_DEPS += ../../../library/common/up_adc_channel.v
@@ -61,9 +75,13 @@ M_DEPS += ../../../library/common/up_axi.v
 M_DEPS += ../../../library/common/up_clock_mon.v
 M_DEPS += ../../../library/common/up_dac_channel.v
 M_DEPS += ../../../library/common/up_dac_common.v
-M_DEPS += ../../../library/common/up_xcvr.v
 M_DEPS += ../../../library/common/up_xfer_cntrl.v
 M_DEPS += ../../../library/common/up_xfer_status.v
+M_DEPS += ../../../library/scripts/adi_env.tcl
+M_DEPS += ../../../library/scripts/adi_ip_alt.tcl
+M_DEPS += ../../../library/util_adcfifo/util_adcfifo.v
+M_DEPS += ../../../library/util_adcfifo/util_adcfifo_constr.sdc
+M_DEPS += ../../../library/util_adcfifo/util_adcfifo_hw.tcl
 M_DEPS += ../../../library/util_axis_fifo/address_gray.v
 M_DEPS += ../../../library/util_axis_fifo/address_gray_pipelined.v
 M_DEPS += ../../../library/util_axis_fifo/address_sync.v
@@ -109,6 +127,8 @@ M_FLIST += reconfig_mif
 M_FLIST += *.sopcinfo
 M_FLIST +=  *.jdi
 M_FLIST += *.pin
+M_FLIST += *_summary.csv
+M_FLIST += *.dpf
 
 
 
@@ -125,7 +145,7 @@ clean-all:
 
 
 adrv9371x_a10soc.sof: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_ALTERA) system_project.tcl  >> adrv9371x_a10soc_quartus.log 2>&1
 
 ####################################################################################

@@ -15,7 +15,8 @@ create_bd_port -dir O slwr_n
 create_bd_port -dir O pktend_n
 create_bd_port -dir O epswitch_n
 
-set_property -dict [list CONFIG.PCW_UART0_PERIPHERAL_ENABLE {1}] $sys_ps7
+set axi_uart [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite:2.0 axi_uart]
+set_property -dict [list CONFIG.C_BAUDRATE {115200}] $axi_uart
 
 set axi_usb_fx3 [create_bd_cell -type ip -vlnv analog.com:user:axi_usb_fx3:1.0 axi_usb_fx3]
 
@@ -25,11 +26,20 @@ set_property -dict [list CONFIG.c_mm2s_burst_size {256}] $axi_usb_fx3_dma
 set_property -dict [list CONFIG.c_s2mm_burst_size {256}] $axi_usb_fx3_dma
 set_property -dict [list CONFIG.c_sg_length_width {16}] $axi_usb_fx3_dma
 
-ad_connect axi_usb_fx3_dma/S_AXIS_S2MM axi_usb_fx3/m_axis
+set usb_fx3_rx_axis_fifo [ create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:1.1 usb_fx3_rx_axis_fifo ]
+
+set intr_monitor [ create_bd_cell -type ip -vlnv analog.com:user:axi_intr_monitor:1.0 intr_monitor ]
+
 ad_connect axi_usb_fx3/s_axis axi_usb_fx3_dma/M_AXIS_MM2S
 
-ad_connect /sys_ps7/UART0_RX usb_fx3_uart_tx
-ad_connect /sys_ps7/UART0_TX usb_fx3_uart_rx
+ad_connect sys_cpu_clk usb_fx3_rx_axis_fifo/s_axis_aclk
+ad_connect sys_cpu_resetn usb_fx3_rx_axis_fifo/s_axis_aresetn
+
+ad_connect axi_usb_fx3/m_axis usb_fx3_rx_axis_fifo/S_AXIS
+ad_connect axi_usb_fx3_dma/S_AXIS_S2MM usb_fx3_rx_axis_fifo/M_AXIS
+
+ad_connect axi_uart/rx usb_fx3_uart_tx
+ad_connect axi_uart/tx usb_fx3_uart_rx
 
 ad_connect sys_cpu_clk axi_usb_fx3/s_axi_aclk
 ad_connect sys_cpu_resetn axi_usb_fx3/s_axi_aresetn
@@ -50,9 +60,14 @@ ad_connect axi_usb_fx3/epswitch_n epswitch_n
 ad_cpu_interrupt ps-13 mb-12 axi_usb_fx3/irq
 ad_cpu_interrupt ps-12 mb-13 axi_usb_fx3_dma/mm2s_introut
 ad_cpu_interrupt ps-11 mb-14 axi_usb_fx3_dma/s2mm_introut
+ad_cpu_interrupt ps-10 mb-15 axi_uart/interrupt
+ad_cpu_interrupt ps-9 mb-16 intr_monitor/irq
 
 ad_cpu_interconnect 0x50000000 axi_usb_fx3
 ad_cpu_interconnect 0x40400000 axi_usb_fx3_dma
+ad_cpu_interconnect 0x40600000 axi_uart
+ad_cpu_interconnect 0x43c00000 intr_monitor
+
 ad_mem_hp1_interconnect sys_cpu_clk sys_ps7/S_AXI_HP1
 ad_mem_hp1_interconnect sys_cpu_clk axi_usb_fx3_dma/M_AXI_SG
 ad_mem_hp1_interconnect sys_cpu_clk axi_usb_fx3_dma/M_AXI_MM2S
@@ -60,7 +75,7 @@ ad_mem_hp1_interconnect sys_cpu_clk axi_usb_fx3_dma/M_AXI_S2MM
 
 # test
 
-set ila [create_bd_cell -type ip -vlnv xilinx.com:ip:ila:6.0 ila]
+set ila [create_bd_cell -type ip -vlnv xilinx.com:ip:ila:6.1 ila]
 
 set_property -dict [list CONFIG.C_MONITOR_TYPE {Native}] $ila
 set_property -dict [list CONFIG.C_NUM_OF_PROBES {11}] $ila
@@ -69,7 +84,7 @@ set_property -dict [list CONFIG.C_PROBE3_WIDTH {2}] $ila
 set_property -dict [list CONFIG.C_PROBE2_WIDTH {15}] $ila
 set_property -dict [list CONFIG.C_PROBE1_WIDTH {74}] $ila
 set_property -dict [list CONFIG.C_PROBE0_WIDTH {75}] $ila
-set_property -dict [list CONFIG.C_DATA_DEPTH {32768}] $ila
+set_property -dict [list CONFIG.C_DATA_DEPTH {65536}] $ila
 set_property -dict [list CONFIG.C_EN_STRG_QUAL {1}] $ila
 set_property -dict [list CONFIG.C_PROBE2_MU_CNT {2}] $ila
 set_property -dict [list CONFIG.C_PROBE1_MU_CNT {2}] $ila

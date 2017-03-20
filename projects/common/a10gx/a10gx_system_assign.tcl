@@ -3,6 +3,8 @@
 
 set_global_assignment -name FAMILY "Arria 10"
 set_global_assignment -name DEVICE 10AX115S3F45E2SGE3
+set_global_assignment -name MESSAGE_DISABLE 17951 ; ## disable unused RX channels message
+set_global_assignment -name MESSAGE_DISABLE 18655 ; ## disable unused TX channels message
 
 # clocks and resets
 
@@ -227,25 +229,7 @@ set_instance_assignment -name IO_STANDARD "1.8 V" -to gpio_bd_i[8]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to gpio_bd_i[9]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to gpio_bd_i[10]
 
-# globals
+# source defaults
 
-set_global_assignment -name SYNCHRONIZER_IDENTIFICATION AUTO
-set_global_assignment -name ENABLE_ADVANCED_IO_TIMING ON
-set_global_assignment -name USE_TIMEQUEST_TIMING_ANALYZER ON
-set_global_assignment -name TIMEQUEST_DO_REPORT_TIMING ON
-set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
-set_global_assignment -name TIMEQUEST_REPORT_SCRIPT $ad_hdl_dir/projects/scripts/adi_tquest.tcl
-set_global_assignment -name ON_CHIP_BITSTREAM_DECOMPRESSION OFF
-
-# library paths
-
-set ad_lib_folders "$ad_hdl_dir/library/**/*;$ad_phdl_dir/library/**/*"
-
-set_user_option -name USER_IP_SEARCH_PATHS $ad_lib_folders
-set_global_assignment -name IP_SEARCH_PATHS $ad_lib_folders
-
-# generate qsys
-
-exec -ignorestderr $quartus(quartus_rootpath)/sopc_builder/bin/qsys-script --script=system_qsys.tcl
- 
+source $ad_hdl_dir/projects/common/altera/sys_gen.tcl
 

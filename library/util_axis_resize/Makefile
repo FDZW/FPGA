@@ -5,10 +5,10 @@
 ####################################################################################
 ####################################################################################
 
-M_DEPS := util_axis_resize_ip.tcl
 M_DEPS += ../scripts/adi_env.tcl
 M_DEPS += ../scripts/adi_ip.tcl
 M_DEPS += util_axis_resize.v
+M_DEPS += util_axis_resize_ip.tcl
 
 M_VIVADO := vivado -mode batch -source
 
@@ -39,7 +39,7 @@ clean-all:
 
 
 util_axis_resize.xpr: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_VIVADO) util_axis_resize_ip.tcl  >> util_axis_resize_ip.log 2>&1
 
 ####################################################################################

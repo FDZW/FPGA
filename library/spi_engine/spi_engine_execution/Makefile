@@ -5,10 +5,15 @@
 ####################################################################################
 ####################################################################################
 
-M_DEPS := spi_engine_execution_ip.tcl
 M_DEPS += ../../scripts/adi_env.tcl
 M_DEPS += ../../scripts/adi_ip.tcl
 M_DEPS += spi_engine_execution.v
+M_DEPS += spi_engine_execution_ip.tcl
+
+M_DEPS += ../../spi_engine/interfaces/spi_engine_ctrl.xml
+M_DEPS += ../../spi_engine/interfaces/spi_engine_ctrl_rtl.xml
+M_DEPS += ../../spi_engine/interfaces/spi_master.xml
+M_DEPS += ../../spi_engine/interfaces/spi_master_rtl.xml
 
 M_VIVADO := vivado -mode batch -source
 
@@ -39,7 +44,7 @@ clean-all:
 
 
 spi_engine_execution.xpr: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_VIVADO) spi_engine_execution_ip.tcl  >> spi_engine_execution_ip.log 2>&1
 
 ####################################################################################

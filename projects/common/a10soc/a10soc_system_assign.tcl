@@ -3,6 +3,8 @@
 
 set_global_assignment -name FAMILY "Arria 10"
 set_global_assignment -name DEVICE 10AS066N3F40E2SGE2
+set_global_assignment -name MESSAGE_DISABLE 17951 ; ## disable unused RX channels message
+set_global_assignment -name MESSAGE_DISABLE 18655 ; ## disable unused TX channels message
 
 # clocks and resets
 
@@ -254,20 +256,6 @@ set_instance_assignment -name IO_STANDARD "1.8 V" -to hps_gpio[1]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to hps_gpio[2]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to hps_gpio[3]
 
-# globals
+# source defaults
 
-set_global_assignment -name SYNCHRONIZER_IDENTIFICATION AUTO
-set_global_assignment -name ENABLE_ADVANCED_IO_TIMING ON
-set_global_assignment -name USE_TIMEQUEST_TIMING_ANALYZER ON
-set_global_assignment -name TIMEQUEST_DO_REPORT_TIMING ON
-set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
-set_global_assignment -name TIMEQUEST_REPORT_SCRIPT $ad_hdl_dir/projects/scripts/adi_tquest.tcl
-set_global_assignment -name ON_CHIP_BITSTREAM_DECOMPRESSION OFF
-
-# set libraries
-
-set ad_lib_folders "../common/;../../common/a10soc/;../../../library/**/*"
-
-set_user_option -name USER_IP_SEARCH_PATHS $ad_lib_folders
-set_global_assignment -name IP_SEARCH_PATHS $ad_lib_folders
-
+source $ad_hdl_dir/projects/common/altera/sys_gen.tcl

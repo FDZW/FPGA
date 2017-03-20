@@ -249,7 +249,7 @@ module up_hdmi_tx (
       if ((up_wreq_s == 1'b1) && (up_waddr[11:0] == 12'h01a)) begin
         up_clip_max <= up_wdata[23:0];
       end
-	  if ((up_wreq_s == 1'b1) && (up_waddr[11:0] == 12'h01b)) begin
+    if ((up_wreq_s == 1'b1) && (up_waddr[11:0] == 12'h01b)) begin
         up_clip_min <= up_wdata[23:0];
       end
       if ((up_wreq_s == 1'b1) && (up_waddr[11:0] == 12'h100)) begin
@@ -323,7 +323,7 @@ module up_hdmi_tx (
 
   // hdmi control & status
 
-  up_xfer_cntrl #(.DATA_WIDTH(237)) i_xfer_cntrl (
+  up_xfer_cntrl #(.DATA_WIDTH(236)) i_xfer_cntrl (
     .up_rstn (up_rstn),
     .up_clk (up_clk),
     .up_data_cntrl ({ up_ss_bypass,

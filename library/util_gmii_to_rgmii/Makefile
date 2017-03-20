@@ -5,12 +5,12 @@
 ####################################################################################
 ####################################################################################
 
-M_DEPS := util_gmii_to_rgmii_ip.tcl
 M_DEPS += ../scripts/adi_env.tcl
 M_DEPS += ../scripts/adi_ip.tcl
 M_DEPS += mdc_mdio.v
-M_DEPS += util_gmii_to_rgmii_constr.xdc
 M_DEPS += util_gmii_to_rgmii.v
+M_DEPS += util_gmii_to_rgmii_constr.xdc
+M_DEPS += util_gmii_to_rgmii_ip.tcl
 
 M_VIVADO := vivado -mode batch -source
 
@@ -41,7 +41,7 @@ clean-all:
 
 
 util_gmii_to_rgmii.xpr: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_VIVADO) util_gmii_to_rgmii_ip.tcl  >> util_gmii_to_rgmii_ip.log 2>&1
 
 ####################################################################################

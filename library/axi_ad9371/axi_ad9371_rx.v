@@ -296,7 +296,7 @@ module axi_ad9371_rx (
   // common processor control
 
   up_adc_common #(
-    .ADC_COMMON_ID ('h00),
+    .COMMON_ID ('h00),
     .ID (ID))
   i_up_adc_common (
     .mmcm_rst (),
@@ -319,7 +319,7 @@ module axi_ad9371_rx (
     .up_drp_wr (),
     .up_drp_addr (),
     .up_drp_wdata (),
-    .up_drp_rdata (16'd0),
+    .up_drp_rdata (32'd0),
     .up_drp_ready (1'd0),
     .up_drp_locked (1'd1),
     .up_usr_chanmax (),

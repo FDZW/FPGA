@@ -7,7 +7,7 @@ adi_ip_create axi_ad9371
 adi_ip_files axi_ad9371 [list \
   "$ad_hdl_dir/library/common/ad_axi_ip_constr.xdc" \
   "$ad_hdl_dir/library/common/ad_rst.v" \
-  "$ad_hdl_dir/library/common/ad_mul.v" \
+  "$ad_hdl_dir/library/xilinx/common/ad_mul.v" \
   "$ad_hdl_dir/library/common/ad_dds_sine.v" \
   "$ad_hdl_dir/library/common/ad_dds_1.v" \
   "$ad_hdl_dir/library/common/ad_dds.v" \
@@ -22,6 +22,7 @@ adi_ip_files axi_ad9371 [list \
   "$ad_hdl_dir/library/common/up_adc_channel.v" \
   "$ad_hdl_dir/library/common/up_dac_common.v" \
   "$ad_hdl_dir/library/common/up_dac_channel.v" \
+  "$ad_hdl_dir/library/common/ad_xcvr_rx_if.v" \
   "axi_ad9371_if.v" \
   "axi_ad9371_rx_channel.v" \
   "axi_ad9371_rx.v" \
@@ -35,9 +36,12 @@ adi_ip_properties axi_ad9371
 adi_ip_constraints axi_jesd_gt [list \
   "$ad_hdl_dir/library/common/ad_axi_ip_constr.xdc" ]
 
-set_property driver_value 0 [ipx::get_ports *dac_sync_in* -of_objects [ipx::current_core]]
 set_property driver_value 0 [ipx::get_ports *dovf* -of_objects [ipx::current_core]]
 set_property driver_value 0 [ipx::get_ports *dunf* -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports *dac_sync_in* -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports *dac_tx_ready* -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports *adc_rx_valid* -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports *adc_rx_os_valid* -of_objects [ipx::current_core]]
 
 ipx::save_core [ipx::current_core]
 

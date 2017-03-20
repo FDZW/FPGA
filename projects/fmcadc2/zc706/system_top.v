@@ -209,8 +209,9 @@ module system_top (
   wire            spi1_mosi;
   wire            spi1_miso;
   wire            rx_ref_clk;
-  wire            rx_sysref;
   wire            rx_sync;
+  wire            rx_clk;
+  wire            rx_sysref;
 
   // instantiations
 
@@ -232,8 +233,6 @@ module system_top (
     .OB (rx_sync_n));
 
   // spi
-
-  assign gpio_i[37:36] = gpio_o[37:36];
 
   fmcadc2_spi i_fmcadc2_spi (
     .spi_adf4355 (gpio_o[36]),
@@ -261,6 +260,11 @@ module system_top (
     .dio_i (gpio_o[14:0]),
     .dio_o (gpio_i[14:0]),
     .dio_p (gpio_bd));
+
+  ad_sysref_gen i_sysref (
+    .core_clk (rx_clk),
+    .sysref_en (gpio_o[34]),
+    .sysref_out (rx_sysref));
 
   system_wrapper i_system_wrapper (
     .ddr3_addr (ddr3_addr),
@@ -322,11 +326,26 @@ module system_top (
     .ps_intr_10 (1'b0),
     .ps_intr_11 (1'b0),
     .ps_intr_12 (1'b0),
-    .rx_data_n (rx_data_n),
-    .rx_data_p (rx_data_p),
-    .rx_ref_clk (rx_ref_clk),
-    .rx_sync (rx_sync),
-    .rx_sysref (rx_sysref),
+    .rx_data_0_n (rx_data_n[0]),
+    .rx_data_0_p (rx_data_p[0]),
+    .rx_data_1_n (rx_data_n[1]),
+    .rx_data_1_p (rx_data_p[1]),
+    .rx_data_2_n (rx_data_n[2]),
+    .rx_data_2_p (rx_data_p[2]),
+    .rx_data_3_n (rx_data_n[3]),
+    .rx_data_3_p (rx_data_p[3]),
+    .rx_data_4_n (rx_data_n[4]),
+    .rx_data_4_p (rx_data_p[4]),
+    .rx_data_5_n (rx_data_n[5]),
+    .rx_data_5_p (rx_data_p[5]),
+    .rx_data_6_n (rx_data_n[6]),
+    .rx_data_6_p (rx_data_p[6]),
+    .rx_data_7_n (rx_data_n[7]),
+    .rx_data_7_p (rx_data_p[7]),
+    .rx_ref_clk_0 (rx_ref_clk),
+    .rx_sync_0 (rx_sync),
+    .rx_sysref_0 (rx_sysref),
+    .rx_core_clk (rx_clk),
     .spdif (spdif),
     .spi0_clk_i (spi0_clk),
     .spi0_clk_o (spi0_clk),

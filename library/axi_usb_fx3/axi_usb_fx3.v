@@ -65,6 +65,7 @@ module axi_usb_fx3 (
   irq,
 
   // DEBUG
+
   debug_fx32dma,
   debug_dma2fx3,
   debug_status,
@@ -91,6 +92,7 @@ module axi_usb_fx3 (
   s_axi_aresetn,
   s_axi_awvalid,
   s_axi_awaddr,
+  s_axi_awprot,
   s_axi_awready,
   s_axi_wvalid,
   s_axi_wdata,
@@ -101,6 +103,7 @@ module axi_usb_fx3 (
   s_axi_bready,
   s_axi_arvalid,
   s_axi_araddr,
+  s_axi_arprot,
   s_axi_arready,
   s_axi_rvalid,
   s_axi_rresp,
@@ -127,6 +130,7 @@ module axi_usb_fx3 (
   output          epswitch_n;
 
   // DEBUG
+
   output  [74:0]  debug_fx32dma;
   output  [73:0]  debug_dma2fx3;
   output  [14:0]  debug_status;
@@ -157,6 +161,7 @@ module axi_usb_fx3 (
   input           s_axi_aresetn;
   input           s_axi_awvalid;
   input   [31:0]  s_axi_awaddr;
+  input   [ 2:0]  s_axi_awprot;
   output          s_axi_awready;
   input           s_axi_wvalid;
   input   [31:0]  s_axi_wdata;
@@ -167,6 +172,7 @@ module axi_usb_fx3 (
   input           s_axi_bready;
   input           s_axi_arvalid;
   input   [31:0]  s_axi_araddr;
+  input   [ 2:0]  s_axi_arprot;
   output          s_axi_arready;
   output          s_axi_rvalid;
   output  [ 1:0]  s_axi_rresp;
@@ -246,6 +252,12 @@ module axi_usb_fx3 (
   wire    [ 4:0]  fifo_num;
   wire    [10:0]  fifo_ready;
 
+  wire    [31:0]  length_fx32dma;
+  wire    [31:0]  length_dma2fx3;
+
+  wire            trig;
+  wire            zlp;
+
   // signal name changes
 
   assign up_clk   = s_axi_aclk;
@@ -301,6 +313,9 @@ module axi_usb_fx3 (
     .fifoa_header_size(fifoa_header_size),
     .fifoa_buffer_size(fifoa_buffer_size),
 
+    .length_fx32dma(length_fx32dma),
+    .length_dma2fx3(length_dma2fx3),
+
     .fx32dma_valid(fx32dma_valid),
     .fx32dma_ready(fx32dma_ready),
     .fx32dma_data(fx32dma_data),
@@ -320,6 +335,8 @@ module axi_usb_fx3 (
     .test_mode_tpg(test_mode_tpg),
     .monitor_error(monitor_error),
 
+    .zlp(zlp),
+
     .fifo_num(fifo_num));
 
   // register map
@@ -331,6 +348,7 @@ module axi_usb_fx3 (
     .eot_fx32dma(eot_fx32dma),
     .eot_dma2fx3(eot_dma2fx3),
     .trig(trig),
+    .zlp(zlp),
     .fifo_num(fifo_num),
 
     .error(error),
@@ -385,6 +403,9 @@ module axi_usb_fx3 (
     .fifoa_header_size(fifoa_header_size),
     .fifoa_buffer_size(fifoa_buffer_size),
 
+    .length_fx32dma(length_fx32dma),
+    .length_dma2fx3(length_dma2fx3),
+
     .up_rstn(up_rstn),
     .up_clk(up_clk),
     .up_wreq(up_wreq),
@@ -426,6 +447,7 @@ module axi_usb_fx3 (
     .fx32dma_data(fx32dma_data),
     .fx32dma_sop(fx32dma_sop),
     .fx32dma_eop(fx32dma_eop),
+    .eot_fx32dma(eot_fx32dma),
 
     .dma2fx3_ready(dma2fx3_ready),
     .dma2fx3_valid(dma2fx3_valid),

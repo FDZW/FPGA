@@ -5,10 +5,10 @@
 ####################################################################################
 ####################################################################################
 
-M_DEPS := cordic_demod_ip.tcl
 M_DEPS += ../scripts/adi_env.tcl
 M_DEPS += ../scripts/adi_ip.tcl
 M_DEPS += cordic_demod.v
+M_DEPS += cordic_demod_ip.tcl
 
 M_VIVADO := vivado -mode batch -source
 
@@ -39,7 +39,7 @@ clean-all:
 
 
 cordic_demod.xpr: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_VIVADO) cordic_demod_ip.tcl  >> cordic_demod_ip.log 2>&1
 
 ####################################################################################

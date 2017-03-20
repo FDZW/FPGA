@@ -5,10 +5,13 @@
 ####################################################################################
 ####################################################################################
 
-M_DEPS := util_sigma_delta_spi_ip.tcl
 M_DEPS += ../scripts/adi_env.tcl
 M_DEPS += ../scripts/adi_ip.tcl
 M_DEPS += util_sigma_delta_spi.v
+M_DEPS += util_sigma_delta_spi_ip.tcl
+
+M_DEPS += ../spi_engine/interfaces/spi_master.xml
+M_DEPS += ../spi_engine/interfaces/spi_master_rtl.xml
 
 M_VIVADO := vivado -mode batch -source
 
@@ -39,7 +42,7 @@ clean-all:
 
 
 util_sigma_delta_spi.xpr: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_VIVADO) util_sigma_delta_spi_ip.tcl  >> util_sigma_delta_spi_ip.log 2>&1
 
 ####################################################################################

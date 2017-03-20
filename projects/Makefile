@@ -8,6 +8,7 @@
 .PHONY: all clean clean_all
 all:
 	-make -C ad6676evb all
+	-make -C ad7616_sdz all
 	-make -C ad7768evb all
 	-make -C ad9265_fmc all
 	-make -C ad9434_fmc all
@@ -27,22 +28,25 @@ all:
 	-make -C fmcadc4 all
 	-make -C fmcadc5 all
 	-make -C fmcjesdadc1 all
-	-make -C fmcomms1 all
+	-make -C fmcomms11 all
 	-make -C fmcomms2 all
 	-make -C fmcomms5 all
-	-make -C fmcomms6 all
 	-make -C fmcomms7 all
 	-make -C imageon all
 	-make -C machine_health all
+	-make -C m2k all
 	-make -C motcon2_fmc all
-	-make -C pzsdr all
+	-make -C pluto all
 	-make -C pzsdr1 all
+	-make -C pzsdr2 all
 	-make -C usb_fx3 all
 	-make -C usdrx1 all
+	-make -C usrpe31x all
 
 
 clean:
 	make -C ad6676evb clean
+	make -C ad7616_sdz clean
 	make -C ad7768evb clean
 	make -C ad9265_fmc clean
 	make -C ad9434_fmc clean
@@ -62,22 +66,25 @@ clean:
 	make -C fmcadc4 clean
 	make -C fmcadc5 clean
 	make -C fmcjesdadc1 clean
-	make -C fmcomms1 clean
+	make -C fmcomms11 clean
 	make -C fmcomms2 clean
 	make -C fmcomms5 clean
-	make -C fmcomms6 clean
 	make -C fmcomms7 clean
 	make -C imageon clean
 	make -C machine_health clean
+	make -C m2k clean
 	make -C motcon2_fmc clean
-	make -C pzsdr clean
+	make -C pluto clean
 	make -C pzsdr1 clean
+	make -C pzsdr2 clean
 	make -C usb_fx3 clean
 	make -C usdrx1 clean
+	make -C usrpe31x clean
 
 
 clean-all:
 	make -C ad6676evb clean-all
+	make -C ad7616_sdz clean-all
 	make -C ad7768evb clean-all
 	make -C ad9265_fmc clean-all
 	make -C ad9434_fmc clean-all
@@ -97,18 +104,20 @@ clean-all:
 	make -C fmcadc4 clean-all
 	make -C fmcadc5 clean-all
 	make -C fmcjesdadc1 clean-all
-	make -C fmcomms1 clean-all
+	make -C fmcomms11 clean-all
 	make -C fmcomms2 clean-all
 	make -C fmcomms5 clean-all
-	make -C fmcomms6 clean-all
 	make -C fmcomms7 clean-all
 	make -C imageon clean-all
 	make -C machine_health clean-all
+	make -C m2k clean-all
 	make -C motcon2_fmc clean-all
-	make -C pzsdr clean-all
+	make -C pluto clean-all
 	make -C pzsdr1 clean-all
+	make -C pzsdr2 clean-all
 	make -C usb_fx3 clean-all
 	make -C usdrx1 clean-all
+	make -C usrpe31x clean-all
 
 ####################################################################################
 ####################################################################################

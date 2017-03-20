@@ -8,6 +8,11 @@ variable sys_hp2_interconnect_index
 variable sys_hp3_interconnect_index
 variable sys_mem_interconnect_index
 
+variable xcvr_index
+variable xcvr_tx_index
+variable xcvr_rx_index
+variable xcvr_instance
+
 ###################################################################################################
 ###################################################################################################
 
@@ -17,6 +22,11 @@ set sys_hp1_interconnect_index -1
 set sys_hp2_interconnect_index -1
 set sys_hp3_interconnect_index -1
 set sys_mem_interconnect_index -1
+
+set xcvr_index -1
+set xcvr_tx_index 0
+set xcvr_rx_index 0
+set xcvr_instance NONE
 
 ###################################################################################################
 ###################################################################################################
@@ -100,9 +110,127 @@ proc ad_disconnect {p_name_1 p_name_2} {
   set m_name_2 [ad_connect_type $p_name_2]
 
   if {[get_property CLASS $m_name_1] eq "bd_net"} {
-    puts "disconnect_bd_net $m_name_1 $m_name_2"
     disconnect_bd_net $m_name_1 $m_name_2
     return
+  }
+
+}
+
+proc ad_reconct {p_name_1 p_name_2} {
+
+  set m_name_1 [ad_connect_type $p_name_1]
+  set m_name_2 [ad_connect_type $p_name_2]
+
+  if {[get_property CLASS $m_name_1] eq "bd_pin"} {
+    delete_bd_objs -quiet [get_bd_nets -quiet -of_objects \
+      [find_bd_objs -relation connected_to $m_name_1]]
+    delete_bd_objs -quiet [get_bd_nets -quiet -of_objects \
+      [find_bd_objs -relation connected_to $m_name_2]]
+  }
+
+  if {[get_property CLASS $m_name_1] eq "bd_intf_pin"} {
+    delete_bd_objs -quiet [get_bd_intf_nets -quiet -of_objects \
+      [find_bd_objs -relation connected_to $m_name_1]]
+    delete_bd_objs -quiet [get_bd_intf_nets -quiet -of_objects \
+      [find_bd_objs -relation connected_to $m_name_2]]
+  }
+
+  ad_connect $p_name_1 $p_name_2
+}
+
+###################################################################################################
+###################################################################################################
+
+proc ad_xcvrcon {u_xcvr a_xcvr a_jesd} {
+  
+  global xcvr_index
+  global xcvr_tx_index
+  global xcvr_rx_index
+  global xcvr_instance
+
+  set no_of_lanes [get_property CONFIG.NUM_OF_LANES [get_bd_cells $a_xcvr]]
+  set qpll_enable [get_property CONFIG.QPLL_ENABLE [get_bd_cells $a_xcvr]]
+  set tx_or_rx_n [get_property CONFIG.TX_OR_RX_N [get_bd_cells $a_xcvr]]
+
+  if {$xcvr_instance ne $u_xcvr} {
+    set xcvr_index [expr ($xcvr_index + 1)]
+    set xcvr_tx_index 0
+    set xcvr_rx_index 0
+    set xcvr_instance $u_xcvr
+  }
+
+  set txrx "rx"
+  set data_dir "I"
+  set ctrl_dir "O"
+  set index $xcvr_rx_index
+
+  if {$tx_or_rx_n == 1} {
+
+    set txrx "tx"
+    set data_dir "O"
+    set ctrl_dir "I"
+    set index $xcvr_tx_index
+  }
+
+  set m_sysref ${txrx}_sysref_${index}
+  set m_sync ${txrx}_sync_${index}
+  set m_data ${txrx}_data
+
+  if {$xcvr_index >= 1} {
+
+    set m_sysref ${txrx}_sysref_${xcvr_index}_${index}
+    set m_sync ${txrx}_sync_${xcvr_index}_${index}
+    set m_data ${txrx}_data_${xcvr_index}
+  }
+
+  create_bd_port -dir I $m_sysref
+  create_bd_port -dir ${ctrl_dir} $m_sync
+  create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 ${a_jesd}_rstgen
+
+  for {set n 0} {$n < $no_of_lanes} {incr n} {
+
+    set m [expr ($n + $index)]
+
+    if {$tx_or_rx_n == 0} {
+      ad_connect  ${a_xcvr}/up_es_${n} ${u_xcvr}/up_es_${m}
+      ad_connect  ${a_jesd}/rxencommaalign_out ${u_xcvr}/${txrx}_calign_${m}
+    }
+
+    if {(($m%4) == 0) && ($qpll_enable == 1)} {
+      ad_connect  ${a_xcvr}/up_cm_${n} ${u_xcvr}/up_cm_${m}
+    }
+
+    ad_connect  ${a_xcvr}/up_ch_${n} ${u_xcvr}/up_${txrx}_${m}
+    ad_connect  ${u_xcvr}/${txrx}_${m} ${a_jesd}/gt${n}_${txrx}
+    ad_connect  ${u_xcvr}/${txrx}_out_clk_${index} ${u_xcvr}/${txrx}_clk_${m}
+
+    create_bd_port -dir ${data_dir} ${m_data}_${m}_p
+    create_bd_port -dir ${data_dir} ${m_data}_${m}_n
+    ad_connect  ${u_xcvr}/${txrx}_${m}_p ${m_data}_${m}_p
+    ad_connect  ${u_xcvr}/${txrx}_${m}_n ${m_data}_${m}_n
+  }
+
+  ad_connect  ${a_jesd}/${txrx}_sysref $m_sysref
+  ad_connect  ${a_jesd}/${txrx}_sync $m_sync
+  ad_connect  ${u_xcvr}/${txrx}_out_clk_${index} ${a_jesd}/${txrx}_core_clk
+  ad_connect  ${a_xcvr}/up_status ${a_jesd}/${txrx}_reset_done
+  ad_connect  ${u_xcvr}/${txrx}_out_clk_${index} ${a_jesd}_rstgen/slowest_sync_clk
+  ad_connect  sys_cpu_resetn ${a_jesd}_rstgen/ext_reset_in
+  ad_connect  ${a_jesd}_rstgen/peripheral_reset ${a_jesd}/${txrx}_reset
+
+  if {$tx_or_rx_n == 0} {
+    set xcvr_rx_index [expr ($xcvr_rx_index + $no_of_lanes)]
+  }
+
+  if {$tx_or_rx_n == 1} {
+    set xcvr_tx_index [expr ($xcvr_tx_index + $no_of_lanes)]
+  }
+}
+
+proc ad_xcvrpll {m_src m_dst} {
+
+  foreach p_dst [get_bd_pins -quiet $m_dst] {
+    connect_bd_net [ad_connect_type $m_src] $p_dst
   }
 }
 
@@ -275,12 +403,17 @@ proc ad_mem_hpx_interconnect {p_sel p_clk p_name} {
     set p_intf_clock ""
   }
 
+  regsub clk $p_clk resetn p_rst
+  if {[get_bd_nets -quiet $p_rst] eq ""} {
+    set p_rst sys_cpu_resetn
+  }
+
   if {$m_interconnect_index == 0} {
     set_property CONFIG.NUM_MI 1 $m_interconnect_cell
     set_property CONFIG.NUM_SI 1 $m_interconnect_cell
-    ad_connect sys_cpu_resetn $m_interconnect_cell/ARESETN
+    ad_connect $p_rst $m_interconnect_cell/ARESETN
     ad_connect $p_clk $m_interconnect_cell/ACLK
-    ad_connect sys_cpu_resetn $m_interconnect_cell/M00_ARESETN
+    ad_connect $p_rst $m_interconnect_cell/M00_ARESETN
     ad_connect $p_clk $m_interconnect_cell/M00_ACLK
     ad_connect $m_interconnect_cell/M00_AXI $p_name_int
     if {$p_intf_clock ne ""} {
@@ -288,7 +421,7 @@ proc ad_mem_hpx_interconnect {p_sel p_clk p_name} {
     }
   } else {
     set_property CONFIG.NUM_SI $m_interconnect_index $m_interconnect_cell
-    ad_connect sys_cpu_resetn $m_interconnect_cell/${i_str}_ARESETN
+    ad_connect $p_rst $m_interconnect_cell/${i_str}_ARESETN
     ad_connect $p_clk $m_interconnect_cell/${i_str}_ACLK
     ad_connect $m_interconnect_cell/${i_str}_AXI $p_name_int
     if {$p_intf_clock ne ""} {
@@ -297,7 +430,7 @@ proc ad_mem_hpx_interconnect {p_sel p_clk p_name} {
     assign_bd_address $m_addr_seg
   }
 
-  if {$m_interconnect_index == 3} {
+  if {$m_interconnect_index > 1} {
     set_property CONFIG.STRATEGY {2} $m_interconnect_cell
   }
 
@@ -306,6 +439,7 @@ proc ad_mem_hpx_interconnect {p_sel p_clk p_name} {
   if {$p_sel eq "HP1"} {set sys_hp1_interconnect_index $m_interconnect_index}
   if {$p_sel eq "HP2"} {set sys_hp2_interconnect_index $m_interconnect_index}
   if {$p_sel eq "HP3"} {set sys_hp3_interconnect_index $m_interconnect_index}
+
 }
 
 ###################################################################################################
@@ -398,8 +532,19 @@ proc ad_cpu_interconnect {p_address p_name} {
   set p_seg [get_bd_addr_segs -of_objects [get_bd_cells $p_name]]
   set p_index 0
   foreach p_seg_name $p_seg {
-    if {($p_index == 0) && ($sys_zynq < 2)} {
+    if {$p_index == 0} {
       set p_seg_range [get_property range $p_seg_name]
+      if {$p_seg_range < 0x1000} {
+        set p_seg_range 0x1000
+      }
+      if {$sys_zynq == 2} {
+        if {($p_address >= 0x40000000) && ($p_address <= 0x4fffffff)} {
+          set p_address [expr ($p_address + 0x40000000)]
+        }
+        if {($p_address >= 0x70000000) && ($p_address <= 0x7fffffff)} {
+          set p_address [expr ($p_address + 0x20000000)]
+        }
+      }
       create_bd_addr_seg -range $p_seg_range \
         -offset $p_address $sys_addr_cntrl_space \
         $p_seg_name "SEG_data_${p_name}"
@@ -424,7 +569,7 @@ proc ad_cpu_interrupt {p_ps_index p_mb_index p_name} {
   set m_index [expr ($p_index - 8)]
 
   if {($sys_zynq == 2) && ($p_index <= 7)} {
-    set p_net [get_bd_nets -of_objects [get_bd_pins sys_concat_intc_0/In$p_index]] 
+    set p_net [get_bd_nets -of_objects [get_bd_pins sys_concat_intc_0/In$p_index]]
     set p_pin [find_bd_objs -relation connected_to [get_bd_pins sys_concat_intc_0/In$p_index]]
 
     puts "delete_bd_objs $p_net $p_pin"
@@ -433,7 +578,7 @@ proc ad_cpu_interrupt {p_ps_index p_mb_index p_name} {
   }
 
   if {($sys_zynq == 2) && ($p_index >= 8)} {
-    set p_net [get_bd_nets -of_objects [get_bd_pins sys_concat_intc_1/In$m_index]] 
+    set p_net [get_bd_nets -of_objects [get_bd_pins sys_concat_intc_1/In$m_index]]
     set p_pin [find_bd_objs -relation connected_to [get_bd_pins sys_concat_intc_1/In$m_index]]
 
     puts "delete_bd_objs $p_net $p_pin"
@@ -443,7 +588,7 @@ proc ad_cpu_interrupt {p_ps_index p_mb_index p_name} {
 
   if {$sys_zynq <= 1} {
 
-    set p_net [get_bd_nets -of_objects [get_bd_pins sys_concat_intc/In$p_index]] 
+    set p_net [get_bd_nets -of_objects [get_bd_pins sys_concat_intc/In$p_index]]
     set p_pin [find_bd_objs -relation connected_to [get_bd_pins sys_concat_intc/In$p_index]]
 
     puts "delete_bd_objs $p_net $p_pin"

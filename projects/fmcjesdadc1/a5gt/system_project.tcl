@@ -5,13 +5,11 @@ source ../../scripts/adi_env.tcl
 project_new fmcjesdadc1_a5gt -overwrite
 
 source "../../common/a5gt/a5gt_system_assign.tcl"
-set_global_assignment -name IP_SEARCH_PATHS "../common/;../../common/**/*;../../../library/**/*"
-set_user_option -name USER_IP_SEARCH_PATHS "../common/;../../common/**/*;../../../library/**/*"
-set_global_assignment -name QSYS_FILE system_bd.qsys
 
-set_global_assignment -name VERILOG_FILE "../../../library/common/ad_iobuf.v"
 set_global_assignment -name VERILOG_FILE ../common/fmcjesdadc1_spi.v
+set_global_assignment -name VERILOG_FILE ../../../library/common/ad_sysref_gen.v
 set_global_assignment -name VERILOG_FILE system_top.v
+set_global_assignment -name QSYS_FILE system_bd.qsys
 
 set_global_assignment -name SDC_FILE system_constr.sdc
 set_global_assignment -name TOP_LEVEL_ENTITY system_top
@@ -34,6 +32,8 @@ set_location_assignment PIN_U1    -to rx_data[2]
 set_location_assignment PIN_U2    -to "rx_data[2](n)"
 set_location_assignment PIN_R1    -to rx_data[3]
 set_location_assignment PIN_R2    -to "rx_data[3](n)"
+
+set_instance_assignment -name GXB_0PPM_CORECLK ON -to rx_data
 set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to rx_data[0]
 set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to rx_data[1]
 set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to rx_data[2]
@@ -63,9 +63,9 @@ set_instance_assignment -name IO_STANDARD "2.5 V" -to spi_sdio
 
 # disable auto-pack
 
-set_instance_assignment -name QII_AUTO_PACKED_REGISTERS OFF -to * -entity up_xfer_cntrl
-set_instance_assignment -name QII_AUTO_PACKED_REGISTERS OFF -to * -entity up_xfer_status
-set_instance_assignment -name QII_AUTO_PACKED_REGISTERS OFF -to * -entity up_xcvr
+set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
+set_global_assignment -name AUTO_SHIFT_REGISTER_RECOGNITION OFF
+set_global_assignment -name QII_AUTO_PACKED_REGISTERS OFF
 
 execute_flow -compile
 

@@ -14,6 +14,7 @@ delete_bd_objs [get_bd_ports hdmi_data_e]
 delete_bd_objs [get_bd_ports hdmi_data]
 
 set_property CONFIG.EMBEDDED_SYNC {1} [get_bd_cells axi_hdmi_core]
+set_property CONFIG.OUT_CLK_POLARITY {1} [get_bd_cells axi_hdmi_core]
 
 create_bd_port -dir O hdmi_tx_clk
 create_bd_port -dir O -from 15 -to 0 hdmi_tx_data
@@ -36,6 +37,7 @@ set_property -dict [list CONFIG.SYNC_TRANSFER_START {1}] $axi_hdmi_rx_dma
 set_property -dict [list CONFIG.DMA_LENGTH_WIDTH {14}] $axi_hdmi_rx_dma
 set_property -dict [list CONFIG.DMA_DATA_WIDTH_SRC {64}] $axi_hdmi_rx_dma
 set_property -dict [list CONFIG.DMA_DATA_WIDTH_DEST {64}] $axi_hdmi_rx_dma
+set_property -dict [list CONFIG.FIFO_SIZE {16}] $axi_hdmi_rx_dma
 
 create_bd_port -dir I hdmi_rx_clk
 create_bd_port -dir I -from 15 -to 0 hdmi_rx_data
@@ -43,7 +45,7 @@ create_bd_port -dir I -from 15 -to 0 hdmi_rx_data
 ad_connect  hdmi_rx_clk axi_hdmi_rx_core/hdmi_rx_clk
 ad_connect  hdmi_rx_data axi_hdmi_rx_core/hdmi_rx_data
 
-ad_connect  hdmi_rx_clk axi_hdmi_rx_dma/fifo_wr_clk
+ad_connect  axi_hdmi_rx_core/hdmi_clk axi_hdmi_rx_dma/fifo_wr_clk
 ad_connect  axi_hdmi_rx_core/hdmi_dma_sof axi_hdmi_rx_dma/fifo_wr_sync
 ad_connect  axi_hdmi_rx_core/hdmi_dma_de axi_hdmi_rx_dma/fifo_wr_en
 ad_connect  axi_hdmi_rx_core/hdmi_dma_data axi_hdmi_rx_dma/fifo_wr_din

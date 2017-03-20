@@ -74,6 +74,7 @@ module axi_ad9684 (
   s_axi_aresetn,
   s_axi_awvalid,
   s_axi_awaddr,
+  s_axi_awprot,
   s_axi_awready,
   s_axi_wvalid,
   s_axi_wdata,
@@ -84,6 +85,7 @@ module axi_ad9684 (
   s_axi_bready,
   s_axi_arvalid,
   s_axi_araddr,
+  s_axi_arprot,
   s_axi_arready,
   s_axi_rvalid,
   s_axi_rresp,
@@ -139,6 +141,9 @@ module axi_ad9684 (
   output  [ 1:0]  s_axi_rresp;
   output  [31:0]  s_axi_rdata;
   input           s_axi_rready;
+  input   [ 2:0]  s_axi_awprot;
+  input   [ 2:0]  s_axi_arprot;
+
 
   // internal registers
 
@@ -182,11 +187,11 @@ module axi_ad9684 (
   wire            up_drp_sel_s;
   wire            up_drp_wr_s;
   wire    [11:0]  up_drp_addr_s;
-  wire    [15:0]  up_drp_wdata_s;
-  wire    [15:0]  up_drp_rdata_s;
+  wire    [31:0]  up_drp_wdata_s;
+  wire    [31:0]  up_drp_rdata_s;
   wire            up_drp_ready_s;
   wire            up_drp_locked_s;
-  wire            mmcm_rst_s;
+  wire            rst_s;
 
   //defaults
 
@@ -234,7 +239,7 @@ module axi_ad9684 (
     .delay_wdata (up_dwdata_s),
     .delay_rdata (up_drdata_s),
     .delay_locked (delay_locked_s),
-    .mmcm_rst (mmcm_rst_s),
+    .rst (rst_s),
     .up_clk (up_clk),
     .up_rstn (up_rstn),
     .up_drp_sel (up_drp_sel_s),
@@ -254,7 +259,7 @@ module axi_ad9684 (
   up_adc_common #(
     .ID(ID))
   i_up_adc_common (
-    .mmcm_rst (mmcm_rst_s),
+    .mmcm_rst (rst_s),
     .adc_clk (adc_clk),
     .adc_rst (adc_rst),
     .adc_r1_mode (),

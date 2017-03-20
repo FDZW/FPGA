@@ -16,7 +16,7 @@ M_DEPS += ../../scripts/adi_board.tcl
 M_DEPS += ../../common/microzed/microzed_system_ps7.tcl
 M_DEPS += ../../common/microzed/microzed_system_constr.xdc
 M_DEPS += ../../common/microzed/microzed_system_bd.tcl
-M_DEPS += ../../../library/common/ad_iobuf.v
+M_DEPS += ../../../library/xilinx/common/ad_iobuf.v
 M_DEPS += ../../../library/axi_dmac/axi_dmac.xpr
 M_DEPS += ../../../library/axi_generic_adc/axi_generic_adc.xpr
 M_DEPS += ../../../library/spi_engine/axi_spi_engine/axi_spi_engine.xpr
@@ -43,6 +43,7 @@ M_FLIST += *.sdk
 M_FLIST += *.hw
 M_FLIST += *.sim
 M_FLIST += .Xil
+M_FLIST += *.ip_user_files
 
 
 
@@ -69,7 +70,7 @@ clean-all:clean
 
 
 cn0363_microzed.sdk/system_top.hdf: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_VIVADO) system_project.tcl >> cn0363_microzed_vivado.log 2>&1
 
 

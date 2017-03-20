@@ -65,27 +65,8 @@ module axi_ad9361_tdd (
 
   // tx/rx data flow control
 
-  tx_valid,
-  tx_valid_i0,
-  tx_valid_q0,
-  tx_valid_i1,
-  tx_valid_q1,
-
   tdd_tx_valid,
-  tdd_tx_valid_i0,
-  tdd_tx_valid_q0,
-  tdd_tx_valid_i1,
-  tdd_tx_valid_q1,
-
-  rx_valid_i0,
-  rx_valid_q0,
-  rx_valid_i1,
-  rx_valid_q1,
-
-  tdd_rx_valid_i0,
-  tdd_rx_valid_q0,
-  tdd_rx_valid_i1,
-  tdd_rx_valid_q1,
+  tdd_rx_valid,
 
   // bus interface
 
@@ -98,10 +79,7 @@ module axi_ad9361_tdd (
   up_rreq,
   up_raddr,
   up_rdata,
-  up_rack,
-
-  tdd_dbg
-);
+  up_rack);
 
   input             clk;
   input             rst;
@@ -119,31 +97,10 @@ module axi_ad9361_tdd (
   input             tdd_sync;
   output            tdd_sync_cntr;
 
-  // tx data flow control
-
-  input             tx_valid;
-  input             tx_valid_i0;
-  input             tx_valid_q0;
-  input             tx_valid_i1;
-  input             tx_valid_q1;
+  // data flow control
 
   output            tdd_tx_valid;
-  output            tdd_tx_valid_i0;
-  output            tdd_tx_valid_q0;
-  output            tdd_tx_valid_i1;
-  output            tdd_tx_valid_q1;
-
-  // rx data flow control
-
-  input             rx_valid_i0;
-  input             rx_valid_q0;
-  input             rx_valid_i1;
-  input             rx_valid_q1;
-
-  output            tdd_rx_valid_i0;
-  output            tdd_rx_valid_q0;
-  output            tdd_rx_valid_i1;
-  output            tdd_rx_valid_q1;
+  output            tdd_rx_valid;
 
   // bus interface
 
@@ -158,19 +115,9 @@ module axi_ad9361_tdd (
   output  [31:0]    up_rdata;
   output            up_rack;
 
-  output  [41:0]    tdd_dbg;
-
-  reg               tdd_slave_synced = 1'b0;
-
-  reg               tdd_tx_valid    = 1'b0;
-  reg               tdd_tx_valid_i0 = 1'b0;
-  reg               tdd_tx_valid_q0 = 1'b0;
-  reg               tdd_tx_valid_i1 = 1'b0;
-  reg               tdd_tx_valid_q1 = 1'b0;
-  reg               tdd_rx_valid_i0 = 1'b0;
-  reg               tdd_rx_valid_q0 = 1'b0;
-  reg               tdd_rx_valid_i1 = 1'b0;
-  reg               tdd_rx_valid_q1 = 1'b0;
+  reg               tdd_tx_valid = 1'b0;
+  reg               tdd_rx_valid = 1'b0;
+  reg               tdd_sync_cntr = 1'b0;
 
   // internal signals
 
@@ -192,6 +139,8 @@ module axi_ad9361_tdd (
   wire    [23:0]    tdd_vco_tx_off_1_s;
   wire    [23:0]    tdd_rx_on_1_s;
   wire    [23:0]    tdd_rx_off_1_s;
+  wire    [23:0]    tdd_rx_dp_on_1_s;
+  wire    [23:0]    tdd_rx_dp_off_1_s;
   wire    [23:0]    tdd_tx_on_1_s;
   wire    [23:0]    tdd_tx_off_1_s;
   wire    [23:0]    tdd_tx_dp_on_1_s;
@@ -202,6 +151,8 @@ module axi_ad9361_tdd (
   wire    [23:0]    tdd_vco_tx_off_2_s;
   wire    [23:0]    tdd_rx_on_2_s;
   wire    [23:0]    tdd_rx_off_2_s;
+  wire    [23:0]    tdd_rx_dp_on_2_s;
+  wire    [23:0]    tdd_rx_dp_off_2_s;
   wire    [23:0]    tdd_tx_on_2_s;
   wire    [23:0]    tdd_tx_off_2_s;
   wire    [23:0]    tdd_tx_dp_on_2_s;
@@ -209,46 +160,38 @@ module axi_ad9361_tdd (
 
   wire    [23:0]    tdd_counter_status;
 
+  wire              tdd_rx_dp_en_s;
   wire              tdd_tx_dp_en_s;
 
-  assign tdd_dbg = {tdd_counter_status, tdd_enable_s, tdd_sync, tdd_tx_dp_en_s,
-                    tdd_rx_vco_en, tdd_tx_vco_en, tdd_rx_rf_en, tdd_tx_rf_en};
-
   assign  tdd_enabled = tdd_enable_s;
-  assign  tdd_sync_cntr = ~(tdd_enable_s & tdd_terminal_type_s);
+
+  // syncronization control signal
+
+  always @(posedge clk) begin
+    if (tdd_enable_s == 1'b1) begin
+      tdd_sync_cntr <= ~tdd_terminal_type_s;
+    end else begin
+      tdd_sync_cntr <= 1'b0;
+    end
+  end
 
   // tx/rx data flow control
 
   always @(posedge clk) begin
     if((tdd_enable_s == 1) && (tdd_gated_tx_dmapath_s == 1)) begin
-      tdd_tx_valid    <= tx_valid & tdd_tx_dp_en_s;
-      tdd_tx_valid_i0 <= tx_valid_i0 & tdd_tx_dp_en_s;
-      tdd_tx_valid_q0 <= tx_valid_q0 & tdd_tx_dp_en_s;
-      tdd_tx_valid_i1 <= tx_valid_i1 & tdd_tx_dp_en_s;
-      tdd_tx_valid_q1 <= tx_valid_q1 & tdd_tx_dp_en_s;
+      tdd_tx_valid <= tdd_tx_dp_en_s;
     end else begin
-      tdd_tx_valid    <= tx_valid;
-      tdd_tx_valid_i0 <= tx_valid_i0;
-      tdd_tx_valid_q0 <= tx_valid_q0;
-      tdd_tx_valid_i1 <= tx_valid_i1;
-      tdd_tx_valid_q1 <= tx_valid_q1;
+      tdd_tx_valid <= 1'b1;
     end
   end
 
   always @(posedge clk) begin
     if((tdd_enable_s == 1) && (tdd_gated_tx_dmapath_s == 1)) begin
-      tdd_rx_valid_i0 <= rx_valid_i0 & tdd_rx_rf_en;
-      tdd_rx_valid_q0 <= rx_valid_q0 & tdd_rx_rf_en;
-      tdd_rx_valid_i1 <= rx_valid_i1 & tdd_rx_rf_en;
-      tdd_rx_valid_q1 <= rx_valid_q1 & tdd_rx_rf_en;
+      tdd_rx_valid <= tdd_rx_dp_en_s;
     end else begin
-      tdd_rx_valid_i0 <= rx_valid_i0;
-      tdd_rx_valid_q0 <= rx_valid_q0;
-      tdd_rx_valid_i1 <= rx_valid_i1;
-      tdd_rx_valid_q1 <= rx_valid_q1;
+      tdd_rx_valid <= 1'b1;
     end
   end
-
 
   // instantiations
 
@@ -271,6 +214,8 @@ module axi_ad9361_tdd (
     .tdd_vco_tx_off_1(tdd_vco_tx_off_1_s),
     .tdd_rx_on_1(tdd_rx_on_1_s),
     .tdd_rx_off_1(tdd_rx_off_1_s),
+    .tdd_rx_dp_on_1(tdd_rx_dp_on_1_s),
+    .tdd_rx_dp_off_1(tdd_rx_dp_off_1_s),
     .tdd_tx_on_1(tdd_tx_on_1_s),
     .tdd_tx_off_1(tdd_tx_off_1_s),
     .tdd_tx_dp_on_1(tdd_tx_dp_on_1_s),
@@ -281,6 +226,8 @@ module axi_ad9361_tdd (
     .tdd_vco_tx_off_2(tdd_vco_tx_off_2_s),
     .tdd_rx_on_2(tdd_rx_on_2_s),
     .tdd_rx_off_2(tdd_rx_off_2_s),
+    .tdd_rx_dp_on_2(tdd_rx_dp_on_2_s),
+    .tdd_rx_dp_off_2(tdd_rx_dp_off_2_s),
     .tdd_tx_on_2(tdd_tx_on_2_s),
     .tdd_tx_off_2(tdd_tx_off_2_s),
     .tdd_tx_dp_on_2(tdd_tx_dp_on_2_s),
@@ -301,8 +248,8 @@ module axi_ad9361_tdd (
   // for the axi_ad9361 core
 
   ad_tdd_control #(
-    .TX_DATA_PATH_DELAY(14),
-    .CONTROL_PATH_DELAY(3))
+    .TX_DATA_PATH_DELAY(),
+    .CONTROL_PATH_DELAY())
   i_tdd_control(
     .clk(clk),
     .rst(rst),
@@ -320,6 +267,8 @@ module axi_ad9361_tdd (
     .tdd_vco_tx_off_1(tdd_vco_tx_off_1_s),
     .tdd_rx_on_1(tdd_rx_on_1_s),
     .tdd_rx_off_1(tdd_rx_off_1_s),
+    .tdd_rx_dp_on_1(tdd_rx_dp_on_1_s),
+    .tdd_rx_dp_off_1(tdd_rx_dp_off_1_s),
     .tdd_tx_on_1(tdd_tx_on_1_s),
     .tdd_tx_off_1(tdd_tx_off_1_s),
     .tdd_tx_dp_on_1(tdd_tx_dp_on_1_s),
@@ -330,10 +279,13 @@ module axi_ad9361_tdd (
     .tdd_vco_tx_off_2(tdd_vco_tx_off_2_s),
     .tdd_rx_on_2(tdd_rx_on_2_s),
     .tdd_rx_off_2(tdd_rx_off_2_s),
+    .tdd_rx_dp_on_2(tdd_rx_dp_on_2_s),
+    .tdd_rx_dp_off_2(tdd_rx_dp_off_2_s),
     .tdd_tx_on_2(tdd_tx_on_2_s),
     .tdd_tx_off_2(tdd_tx_off_2_s),
     .tdd_tx_dp_on_2(tdd_tx_dp_on_2_s),
     .tdd_tx_dp_off_2(tdd_tx_dp_off_2_s),
+    .tdd_rx_dp_en(tdd_rx_dp_en_s),
     .tdd_tx_dp_en(tdd_tx_dp_en_s),
     .tdd_rx_vco_en(tdd_rx_vco_en),
     .tdd_tx_vco_en(tdd_tx_vco_en),

@@ -5,13 +5,13 @@
 ####################################################################################
 ####################################################################################
 
-M_DEPS := util_cpack_ip.tcl
 M_DEPS += ../scripts/adi_env.tcl
 M_DEPS += ../scripts/adi_ip.tcl
-M_DEPS += util_cpack_mux.v
-M_DEPS += util_cpack_dsf.v
 M_DEPS += util_cpack.v
 M_DEPS += util_cpack_constr.xdc
+M_DEPS += util_cpack_dsf.v
+M_DEPS += util_cpack_ip.tcl
+M_DEPS += util_cpack_mux.v
 
 M_VIVADO := vivado -mode batch -source
 
@@ -42,7 +42,7 @@ clean-all:
 
 
 util_cpack.xpr: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_VIVADO) util_cpack_ip.tcl  >> util_cpack_ip.log 2>&1
 
 ####################################################################################

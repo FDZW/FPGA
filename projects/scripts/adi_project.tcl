@@ -7,7 +7,7 @@ variable p_prcfg_list
 variable p_prcfg_status
 
 if {![info exists REQUIRED_VIVADO_VERSION]} {
-  set REQUIRED_VIVADO_VERSION "2015.4.2"
+  set REQUIRED_VIVADO_VERSION "2016.2"
 }
 
 if {[info exists ::env(ADI_IGNORE_VERSION_CHECK)]} {
@@ -15,6 +15,10 @@ if {[info exists ::env(ADI_IGNORE_VERSION_CHECK)]} {
 } elseif {![info exists IGNORE_VERSION_CHECK]} {
   set IGNORE_VERSION_CHECK 0
 }
+
+set p_board "not-applicable"
+set p_device "none"
+set sys_zynq 1
 
 proc adi_project_create {project_name {mode 0}} {
 
@@ -25,10 +29,6 @@ proc adi_project_create {project_name {mode 0}} {
   global sys_zynq
   global REQUIRED_VIVADO_VERSION
   global IGNORE_VERSION_CHECK
-
-  set p_device "none"
-  set p_board "none"
-  set sys_zynq 0
 
   if [regexp "_ac701$" $project_name] {
     set p_device "xc7a200tfbg676-2"
@@ -47,7 +47,7 @@ proc adi_project_create {project_name {mode 0}} {
   }
   if [regexp "_kcu105$" $project_name] {
     set p_device "xcku040-ffva1156-2-e"
-    set p_board "xilinx.com:kcu105:part0:1.0"
+    set p_board "xilinx.com:kcu105:part0:1.1"
     set sys_zynq 0
   }
   if [regexp "_zed$" $project_name] {
@@ -75,19 +75,9 @@ proc adi_project_create {project_name {mode 0}} {
     set p_board "not-applicable"
     set sys_zynq 1
   }
-  if [regexp "_pzsdr$" $project_name] {
-    set p_device "xc7z035ifbg676-2L"
-    set p_board "not-applicable"
-    set sys_zynq 1
-  }
-  if [regexp "_pzsdr1$" $project_name] {
-    set p_device "xc7z020clg400-1"
-    set p_board "not-applicable"
-    set sys_zynq 1
-  }
   if [regexp "_zcu102$" $project_name] {
-    set p_device "xczu9eg-ffvb1156-1-i-EVAL"
-    set p_board "not-applicable"
+    set p_device "xczu9eg-ffvb1156-1-i-es1"
+    set p_board "xilinx.com:zcu102:part0:1.2"
     set sys_zynq 2
   }
   if [regexp "_zybo" $project_name] {
@@ -175,6 +165,9 @@ proc adi_project_run {project_name} {
   set_property STEPS.PHYS_OPT_DESIGN.IS_ENABLED true [get_runs impl_1]
   set_property STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE Explore [get_runs impl_1]
   set_property STRATEGY "Performance_Explore" [get_runs impl_1]
+  if {![info exists ::env(ADI_NO_BITSTREAM_COMPRESSION)] && ![info exists ADI_NO_BITSTREAM_COMPRESSION]} {
+    set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+  }
 
   launch_runs impl_1 -to_step write_bitstream
   wait_on_run impl_1
