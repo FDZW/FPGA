@@ -77,22 +77,31 @@ for {set i 0} {$i < 3} {incr i} {
 
   current_bd_instance /
 
-  # instantiate the dma
-
-  set axi_dma  [create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 axi_dma_$i]
-  set_property -dict [list CONFIG.FIFO_SIZE {1}] $axi_dma
-  set_property -dict [list CONFIG.DMA_TYPE_SRC {1}]  $axi_dma
-  set_property -dict [list CONFIG.DMA_TYPE_DEST {0}] $axi_dma
-  set_property -dict [list CONFIG.CYCLIC {0}]  $axi_dma
-  set_property -dict [list CONFIG.SYNC_TRANSFER_START {1}] $axi_dma
-  set_property -dict [list CONFIG.AXI_SLICE_SRC {0}] $axi_dma
-  set_property -dict [list CONFIG.AXI_SLICE_DEST {0}]  $axi_dma
-  set_property -dict [list CONFIG.DMA_2D_TRANSFER {0}] $axi_dma
-  set_property -dict [list CONFIG.DMA_DATA_WIDTH_SRC {16}] $axi_dma
-  set_property -dict [list CONFIG.DMA_DATA_WIDTH_DEST {64}]  $axi_dma
-  set_property -dict [list CONFIG.DMA_AXI_PROTOCOL_DEST {1}] $axi_dma
-
 }
+
+# instantiate sequencer
+
+set util_sequencer [create_bd_cell -type ip -vlnv analog.com:user:util_if_sequencer:1.0 util_sequencer]
+
+# instantiate axi generic adc
+
+set axi_adc [create_bd_cell -type ip -vlnv analog.com:user:axi_generic_adc:1.0 axi_adc]
+set_property -dict [list CONFIG.NUM_OF_CHANNELS {3}] $axi_adc
+
+# instantiate the dma
+
+set axi_dma  [create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 axi_dma]
+set_property -dict [list CONFIG.FIFO_SIZE {1}] $axi_dma
+set_property -dict [list CONFIG.DMA_TYPE_SRC {2}]  $axi_dma
+set_property -dict [list CONFIG.DMA_TYPE_DEST {0}] $axi_dma
+set_property -dict [list CONFIG.CYCLIC {0}]  $axi_dma
+set_property -dict [list CONFIG.SYNC_TRANSFER_START {1}] $axi_dma
+set_property -dict [list CONFIG.AXI_SLICE_SRC {0}] $axi_dma
+set_property -dict [list CONFIG.AXI_SLICE_DEST {0}]  $axi_dma
+set_property -dict [list CONFIG.DMA_2D_TRANSFER {0}] $axi_dma
+set_property -dict [list CONFIG.DMA_DATA_WIDTH_SRC {16}] $axi_dma
+set_property -dict [list CONFIG.DMA_DATA_WIDTH_DEST {64}]  $axi_dma
+set_property -dict [list CONFIG.DMA_AXI_PROTOCOL_DEST {1}] $axi_dma
 
 # instantiate the convertion start generator
 
@@ -103,12 +112,14 @@ set axi_cnvst_gen [create_bd_cell -type ip -vlnv analog.com:user:axi_pulse_gen:1
 ad_connect  sys_cpu_clk spi_0/clk
 ad_connect  sys_cpu_clk spi_1/clk
 ad_connect  sys_cpu_clk spi_2/clk
-ad_connect  sys_cpu_clk axi_dma_0/s_axis_aclk
-ad_connect  sys_cpu_clk axi_dma_1/s_axis_aclk
-ad_connect  sys_cpu_clk axi_dma_2/s_axis_aclk
+ad_connect  sys_cpu_clk axi_dma/fifo_wr_clk
+ad_connect  sys_cpu_clk axi_adc/adc_clk
+ad_connect  sys_cpu_clk util_sequencer/clk
 ad_connect  sys_cpu_resetn spi_0/resetn
 ad_connect  sys_cpu_resetn spi_1/resetn
 ad_connect  sys_cpu_resetn spi_2/resetn
+
+# interface connections
 
 ad_connect  spi_adc_0 spi_0/m_spi
 ad_connect  spi_adc_1 spi_1/m_spi
@@ -119,33 +130,30 @@ ad_connect  spi_cnv_2 axi_cnvst_gen/pulse
 ad_connect  axi_cnvst_gen/end_of_pulse spi_0/end_of_pulse
 ad_connect  axi_cnvst_gen/end_of_pulse spi_1/end_of_pulse
 ad_connect  axi_cnvst_gen/end_of_pulse spi_2/end_of_pulse
-
-# interface connections
+ad_connect  axi_adc/adc_enable util_sequencer/channel_enable
+ad_connect  util_sequencer/overflow axi_adc/adc_dovf
+ad_connect  util_sequencer/fifo_out_ready VCC
 
 ad_connect  iic_tmp4 axi_iic_tmp4/iic
-ad_connect  axi_dma_0/s_axis spi_0/M_AXIS_SAMPLE
-ad_connect  axi_dma_1/s_axis spi_1/M_AXIS_SAMPLE
-ad_connect  axi_dma_2/s_axis spi_2/M_AXIS_SAMPLE
+ad_connect  spi_0/M_AXIS_SAMPLE util_sequencer/fifo_in_0
+ad_connect  spi_1/M_AXIS_SAMPLE util_sequencer/fifo_in_1
+ad_connect  spi_2/M_AXIS_SAMPLE util_sequencer/fifo_in_2
+ad_connect  util_sequencer/fifo_wr axi_dma/fifo_wr
 
 # address assignments
 
 ad_cpu_interconnect 0x43C00000 axi_iic_tmp4
-ad_cpu_interconnect 0x43C10000 axi_dma_0
-ad_cpu_interconnect 0x43C20000 axi_dma_1
-ad_cpu_interconnect 0x43C30000 axi_dma_2
+ad_cpu_interconnect 0x43C10000 axi_dma
+ad_cpu_interconnect 0x43C20000 axi_adc
 ad_cpu_interconnect 0x43C40000 spi_0/spi_axi_0
 ad_cpu_interconnect 0x43C50000 spi_1/spi_axi_1
 ad_cpu_interconnect 0x43C60000 spi_2/spi_axi_2
 ad_cpu_interconnect 0x43C70000 axi_cnvst_gen
 
 ad_mem_hp0_interconnect sys_cpu_clk sys_ps7/S_AXI_HP0
-ad_mem_hp0_interconnect sys_cpu_clk axi_dma_0/m_dest_axi
-ad_mem_hp0_interconnect sys_cpu_clk axi_dma_1/m_dest_axi
-ad_mem_hp0_interconnect sys_cpu_clk axi_dma_2/m_dest_axi
+ad_mem_hp0_interconnect sys_cpu_clk axi_dma/m_dest_axi
 
-ad_connect sys_cpu_resetn axi_dma_0/m_dest_axi_aresetn
-ad_connect sys_cpu_resetn axi_dma_1/m_dest_axi_aresetn
-ad_connect sys_cpu_resetn axi_dma_2/m_dest_axi_aresetn
+ad_connect sys_cpu_resetn axi_dma/m_dest_axi_aresetn
 
 # interrupts
 
@@ -153,7 +161,5 @@ ad_cpu_interrupt ps-12 mb-13 axi_iic_tmp4/iic2intc_irpt
 ad_cpu_interrupt ps-11 mb-14 spi_0/irq
 ad_cpu_interrupt ps-10 mb-15 spi_1/irq
 ad_cpu_interrupt ps-9 mb-16 spi_2/irq
-ad_cpu_interrupt ps-8 mb-17 axi_dma_0/irq
-ad_cpu_interrupt ps-7 mb-18 axi_dma_1/irq
-ad_cpu_interrupt ps-6 mb-19 axi_dma_2/irq
+ad_cpu_interrupt ps-8 mb-17 axi_dma/irq
 

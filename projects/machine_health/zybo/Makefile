@@ -16,14 +16,15 @@ M_DEPS += ../../scripts/adi_board.tcl
 M_DEPS += ../../common/zybo/zybo_system_ps7.tcl
 M_DEPS += ../../common/zybo/zybo_system_constr.xdc
 M_DEPS += ../../common/zybo/zybo_system_bd.tcl
-M_DEPS += ../../../library/common/ad_iobuf.v
+M_DEPS += ../../../library/xilinx/common/ad_iobuf.v
 M_DEPS += ../../../library/axi_dmac/axi_dmac.xpr
+M_DEPS += ../../../library/axi_generic_adc/axi_generic_adc.xpr
+M_DEPS += ../../../library/axi_pulse_gen/axi_pulse_gen.xpr
 M_DEPS += ../../../library/spi_engine/axi_spi_engine/axi_spi_engine.xpr
 M_DEPS += ../../../library/spi_engine/spi_engine_execution/spi_engine_execution.xpr
 M_DEPS += ../../../library/spi_engine/spi_engine_interconnect/spi_engine_interconnect.xpr
 M_DEPS += ../../../library/spi_engine/spi_engine_offload/spi_engine_offload.xpr
-M_DEPS += ../../../library/util_pulse_gen/util_pulse_gen.xpr
-M_DEPS += ../../../library/util_sigma_delta_spi/util_sigma_delta_spi.xpr
+M_DEPS += ../../../library/util_if_sequencer/util_if_sequencer.xpr
 
 M_VIVADO := vivado -mode batch -source
 
@@ -39,6 +40,7 @@ M_FLIST += *.sdk
 M_FLIST += *.hw
 M_FLIST += *.sim
 M_FLIST += .Xil
+M_FLIST += *.ip_user_files
 
 
 
@@ -52,27 +54,29 @@ clean:
 
 clean-all:clean
 	make -C ../../../library/axi_dmac clean
+	make -C ../../../library/axi_generic_adc clean
+	make -C ../../../library/axi_pulse_gen clean
 	make -C ../../../library/spi_engine/axi_spi_engine clean
 	make -C ../../../library/spi_engine/spi_engine_execution clean
 	make -C ../../../library/spi_engine/spi_engine_interconnect clean
 	make -C ../../../library/spi_engine/spi_engine_offload clean
-	make -C ../../../library/util_pulse_gen clean
-	make -C ../../../library/util_sigma_delta_spi clean
+	make -C ../../../library/util_if_sequencer clean
 
 
 machine_health_zybo.sdk/system_top.hdf: $(M_DEPS)
-	rm -rf $(M_FLIST)
+	-rm -rf $(M_FLIST)
 	$(M_VIVADO) system_project.tcl >> machine_health_zybo_vivado.log 2>&1
 
 
 lib:
 	make -C ../../../library/axi_dmac
+	make -C ../../../library/axi_generic_adc
+	make -C ../../../library/axi_pulse_gen
 	make -C ../../../library/spi_engine/axi_spi_engine
 	make -C ../../../library/spi_engine/spi_engine_execution
 	make -C ../../../library/spi_engine/spi_engine_interconnect
 	make -C ../../../library/spi_engine/spi_engine_offload
-	make -C ../../../library/util_pulse_gen
-	make -C ../../../library/util_sigma_delta_spi
+	make -C ../../../library/util_if_sequencer
 
 ####################################################################################
 ####################################################################################
