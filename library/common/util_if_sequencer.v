@@ -88,9 +88,9 @@ module util_if_sequencer (
       counter <= 1'h0;
     end else begin
       case (counter)
-        'h0: if ((fifo_in_valid_0 == 1'b1) && (fifo_out_ready == 1'b1)) counter <= counter + 1;
-        'h1: if ((fifo_in_valid_1 == 1'b1) && (fifo_out_ready == 1'b1)) counter <= counter + 1;
-        'h2: if ((fifo_in_valid_2 == 1'b1) && (fifo_out_ready == 1'b1)) counter <= 2'h0;
+        'h0: if (fifo_in_valid_0 == 1'b1) counter <= counter + 1;
+        'h1: if (fifo_in_valid_1 == 1'b1) counter <= counter + 1;
+        'h2: if (fifo_in_valid_2 == 1'b1) counter <= 2'h0;
         default: counter <= 2'h0;
       endcase
     end
@@ -106,6 +106,9 @@ module util_if_sequencer (
       default: fifo_out_data <= fifo_in_data_0;
     endcase
   end
+
+  // the sequencer ignore the fifo_out_ready signal, if the DMA is not ready
+  // samples will be droped
 
   // valid generation
 
@@ -133,26 +136,41 @@ module util_if_sequencer (
   end
 
   // ready generation for input interfaces
+  //
+  // if there isn't any valid transfer in progress, all the input interfaces
+  // will be ready, to prevent unwanted lock of the source module
 
   always @(*) begin
-    case (counter)
-    'h0: fifo_in_ready_0 <= 1'b1;
-    default: fifo_in_ready_0 <= 1'b0;
-    endcase
+    if (sequencer_reset == 1'b0) begin
+      fifo_in_ready_0 <= 1'b1;
+    end else begin
+      case (counter)
+      'h0: fifo_in_ready_0 <= 1'b1;
+      default: fifo_in_ready_0 <= 1'b0;
+      endcase
+    end
   end
 
   always @(*) begin
-    case (counter)
-    'h1: fifo_in_ready_1 <= 1'b1;
-    default: fifo_in_ready_1 <= 1'b0;
-    endcase
+    if (sequencer_reset == 1'b0) begin
+      fifo_in_ready_1 <= 1'b1;
+    end else begin
+      case (counter)
+        'h1: fifo_in_ready_1 <= 1'b1;
+        default: fifo_in_ready_1 <= 1'b0;
+      endcase
+    end
   end
 
   always @(*) begin
-    case (counter)
-    'h2: fifo_in_ready_2 <= 1'b1;
-    default: fifo_in_ready_2 <= 1'b0;
-    endcase
+    if (sequencer_reset == 1'b0) begin
+      fifo_in_ready_2 <= 1'b1;
+    end else begin
+      case (counter)
+        'h2: fifo_in_ready_2 <= 1'b1;
+        default: fifo_in_ready_2 <= 1'b0;
+      endcase
+    end
   end
 
 endmodule
