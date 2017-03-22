@@ -131,7 +131,7 @@ module util_if_sequencer (
     if (counter == 'h00) begin
       fifo_out_sync <= 1'b1;
     end else if (fifo_out_valid == 1'b1) begin
-      fifo_out_sync = 1'b0;
+      fifo_out_sync <= 1'b0;
     end
   end
 
@@ -142,33 +142,33 @@ module util_if_sequencer (
 
   always @(*) begin
     if (sequencer_reset == 1'b0) begin
-      fifo_in_ready_0 <= 1'b1;
+      fifo_in_ready_0 = 1'b1;
     end else begin
       case (counter)
-      'h0: fifo_in_ready_0 <= 1'b1;
-      default: fifo_in_ready_0 <= 1'b0;
+      'h0: fifo_in_ready_0 = 1'b1;
+      default: fifo_in_ready_0 = 1'b0;
       endcase
     end
   end
 
   always @(*) begin
     if (sequencer_reset == 1'b0) begin
-      fifo_in_ready_1 <= 1'b1;
+      fifo_in_ready_1 = 1'b1;
     end else begin
       case (counter)
-        'h1: fifo_in_ready_1 <= 1'b1;
-        default: fifo_in_ready_1 <= 1'b0;
+        'h1: fifo_in_ready_1 = 1'b1;
+        default: fifo_in_ready_1 = 1'b0;
       endcase
     end
   end
 
   always @(*) begin
     if (sequencer_reset == 1'b0) begin
-      fifo_in_ready_2 <= 1'b1;
+      fifo_in_ready_2 = 1'b1;
     end else begin
       case (counter)
-        'h2: fifo_in_ready_2 <= 1'b1;
-        default: fifo_in_ready_2 <= 1'b0;
+        'h2: fifo_in_ready_2 = 1'b1;
+        default: fifo_in_ready_2 = 1'b0;
       endcase
     end
   end
