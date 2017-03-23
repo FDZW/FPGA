@@ -68,7 +68,7 @@ module util_if_sequencer (
   input                     fifo_out_xfer_req,
   input                     fifo_out_overflow,
 
-  output  reg               sequencer_reset,
+  output  reg               sequencer_resetn,
   output  reg               overflow,
   input         [2:0]       channel_enable
 
@@ -77,14 +77,14 @@ module util_if_sequencer (
   reg [1:0] counter = 2'h0;
 
   always @(posedge clk) begin
-    sequencer_reset <= fifo_out_xfer_req;
+    sequencer_resetn <= fifo_out_xfer_req;
     overflow <= fifo_out_overflow;
   end
 
   // selection counter, the first channel has the highest priority (*_0)
 
   always @(posedge clk) begin
-    if(sequencer_reset == 1'b0) begin
+    if(sequencer_resetn == 1'b0) begin
       counter <= 1'h0;
     end else begin
       case (counter)
@@ -113,7 +113,7 @@ module util_if_sequencer (
   // valid generation
 
   always @(posedge clk) begin
-    if (sequencer_reset == 1'b0 || channel_enable[counter] == 1'b0) begin
+    if (sequencer_resetn == 1'b0 || channel_enable[counter] == 1'b0) begin
       fifo_out_valid <= 1'b0;
     end else begin
       case (counter)
@@ -141,7 +141,7 @@ module util_if_sequencer (
   // will be ready, to prevent unwanted lock of the source module
 
   always @(*) begin
-    if (sequencer_reset == 1'b0) begin
+    if (sequencer_resetn == 1'b0) begin
       fifo_in_ready_0 = 1'b1;
     end else begin
       case (counter)
@@ -152,7 +152,7 @@ module util_if_sequencer (
   end
 
   always @(*) begin
-    if (sequencer_reset == 1'b0) begin
+    if (sequencer_resetn == 1'b0) begin
       fifo_in_ready_1 = 1'b1;
     end else begin
       case (counter)
@@ -163,7 +163,7 @@ module util_if_sequencer (
   end
 
   always @(*) begin
-    if (sequencer_reset == 1'b0) begin
+    if (sequencer_resetn == 1'b0) begin
       fifo_in_ready_2 = 1'b1;
     end else begin
       case (counter)
