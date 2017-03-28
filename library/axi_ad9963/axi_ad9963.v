@@ -43,6 +43,7 @@ module axi_ad9963 #(
 
   parameter   ID = 0,
   parameter   DEVICE_TYPE = 0,
+  parameter   ADC_IODELAY_ENABLE = 0,
   parameter   DAC_IODELAY_ENABLE = 0,
   parameter   IO_DELAY_GROUP = "dev_if_delay_group",
   parameter   DAC_DATAPATH_DISABLE = 0,
@@ -176,6 +177,7 @@ module axi_ad9963 #(
 
   axi_ad9963_if #(
     .DEVICE_TYPE (DEVICE_TYPE),
+    .ADC_IODELAY_ENABLE (ADC_IODELAY_ENABLE),
     .DAC_IODELAY_ENABLE (DAC_IODELAY_ENABLE),
     .IO_DELAY_GROUP (IO_DELAY_GROUP))
   i_dev_if (
