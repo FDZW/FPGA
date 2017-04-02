@@ -202,8 +202,9 @@ module axi_ad9963 #(
 
   axi_ad9963_rx #(
     .ID (ID),
-    .DATAPATH_DISABLE (ADC_DATAPATH_DISABLE))
-  i_rx (
+    .DATAPATH_DISABLE (ADC_DATAPATH_DISABLE),
+    .IODELAY_ENABLE (ADC_IODELAY_ENABLE)
+  ) i_rx (
     .adc_rst (adc_rst),
     .adc_clk (adc_clk),
     .adc_valid (adc_valid_s),
