@@ -91,7 +91,6 @@ set_property -dict [list CONFIG.NUM_OF_CHANNELS {3}] $axi_adc
 # instantiate the dma
 
 set axi_dma  [create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 axi_dma]
-set_property -dict [list CONFIG.FIFO_SIZE {1}] $axi_dma
 set_property -dict [list CONFIG.DMA_TYPE_SRC {2}]  $axi_dma
 set_property -dict [list CONFIG.DMA_TYPE_DEST {0}] $axi_dma
 set_property -dict [list CONFIG.CYCLIC {0}]  $axi_dma
