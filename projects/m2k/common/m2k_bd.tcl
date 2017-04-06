@@ -261,6 +261,21 @@ ad_mem_hp2_interconnect converter_dma_clk axi_rd_wr_combiner_converter/m_axi
 ad_mem_hp3_interconnect sys_cpu_clk sys_ps7/S_AXI_HP3
 ad_mem_hp3_interconnect sys_cpu_clk ad9963_dac_dmac_b/m_src_axi
 
+# Map rd-wr combiner
+assign_bd_address [get_bd_addr_segs { \
+  axi_rd_wr_combiner_converter/s_rd_axi/reg0 \
+  axi_rd_wr_combiner_converter/s_wr_axi/reg0 \
+  axi_rd_wr_combiner_logic/s_rd_axi/reg0 \
+  axi_rd_wr_combiner_logic/s_wr_axi/reg0 \
+}]
+
+set_property range 512M [get_bd_addr_segs { \
+  ad9963_dac_dmac_a/m_src_axi/SEG_axi_rd_wr_combiner_converter_reg0 \
+  ad9963_adc_dmac/m_dest_axi/SEG_axi_rd_wr_combiner_converter_reg0 \
+  pattern_generator_dmac/m_src_axi/SEG_axi_rd_wr_combiner_logic_reg0 \
+  logic_analyzer_dmac/m_dest_axi/SEG_axi_rd_wr_combiner_logic_reg0 \
+}]
+
 ad_connect  sys_cpu_resetn logic_analyzer_dmac/m_dest_axi_aresetn
 ad_connect  sys_cpu_resetn pattern_generator_dmac/m_src_axi_aresetn
 ad_connect  sys_cpu_resetn ad9963_adc_dmac/m_dest_axi_aresetn
