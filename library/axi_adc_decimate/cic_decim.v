@@ -67,23 +67,21 @@ module cic_decim (
 
   always @(*) begin
     case (rate_sel)
-    3'h1: rate <= 16'd5;
-    3'h2: rate <= 16'd50;
-    3'h3: rate <= 16'd500;
-    3'h6: rate <= 16'd5000;
-    default: rate <= 16'd50000;
+    3'h1: rate <= 16'd5 - 1;
+    3'h2: rate <= 16'd50 - 1;
+    3'h3: rate <= 16'd500 - 1;
+    3'h6: rate <= 16'd5000 - 1;
+    default: rate <= 16'd50000 - 1;
     endcase
   end
+
+  wire [15:0] counter_in = counter[16] == 1'b1 ? rate : counter[15:0];
 
   always @(posedge clk) begin
     if (reset == 1'b1) begin
       counter <= {1'b1,16'h00};
-    end else if (enable[0] == 1'b1) begin
-      if (counter[16] == 1'b1) begin
-        counter <= rate - 2'h2;
-      end else begin
-        counter <= counter[15:0] - 1'b1;
-      end
+    end else begin
+      counter <= counter_in - 1'b1;
     end
   end
 
