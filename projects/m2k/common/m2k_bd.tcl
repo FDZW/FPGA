@@ -142,8 +142,6 @@ ad_connect pattern_generator_dmac/fifo_rd_valid   logic_analyzer/dac_valid
 ad_connect sys_cpu_clk logic_analyzer/s_axi_aclk
 ad_connect sys_cpu_resetn logic_analyzer/s_axi_aresetn
 
-ad_connect sys_200m_clk             axi_ad9963/delay_clk
-
 ad_connect axi_ad9963/adc_clk  adc_trigger_fifo/clk
 #ad_connect axi_ad9963/adc_clk  util_cpack_ad9963/adc_clk
 ad_connect axi_adc_decimate/adc_clk axi_ad9963/adc_clk
