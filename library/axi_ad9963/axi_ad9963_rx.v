@@ -258,6 +258,9 @@ module axi_ad9963_rx #(
     assign up_dld = 'h00;
     assign up_dwdata = 'h00;
     assign delay_rst = 1'b1;
+    assign up_wack_s[3] = 0;
+    assign up_rack_s[3] = 0;
+    assign up_rdata_s[3] = 'h00;
   end
   endgenerate
 
