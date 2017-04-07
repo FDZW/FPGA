@@ -133,7 +133,7 @@ proc post_propagate {cellpath otherinfo} {
 
 		if {$addr_seg != {}} {
 		   set range [get_property "range" $addr_seg]
-		   set addr_width [expr min(round(log($range) / log(2)), $addr_width)]
+		   set addr_width [expr max(round(log($range) / log(2)), $addr_width)]
 		} else {
 			set addr_width 32
 		}
