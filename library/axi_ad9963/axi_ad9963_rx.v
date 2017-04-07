@@ -73,6 +73,8 @@ module axi_ad9963_rx #(
   input               adc_dovf,
   input               adc_dunf,
 
+  output              up_adc_ce,
+
   // processor interface
 
   input               up_rstn,
@@ -221,6 +223,7 @@ module axi_ad9963_rx #(
     .adc_usr_chanmax (8'd1),
     .up_adc_gpio_in (32'h0),
     .up_adc_gpio_out (),
+    .up_adc_ce(up_adc_ce),
     .up_rstn (up_rstn),
     .up_clk (up_clk),
     .up_wreq (up_wreq),
@@ -258,9 +261,6 @@ module axi_ad9963_rx #(
     assign up_dld = 'h00;
     assign up_dwdata = 'h00;
     assign delay_rst = 1'b1;
-    assign up_wack_s[3] = 0;
-    assign up_rack_s[3] = 0;
-    assign up_rdata_s[3] = 'h00;
   end
   endgenerate
 
