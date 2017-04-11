@@ -267,14 +267,14 @@ module fir_decim #(
   always @(posedge clk) begin
     if (reset == 1'b1) begin
       ce_out <= 1'b0;
-      filter_out <= 'h00;
     end else begin
-      if (ready == 1'b1) begin
-        filter_out <= sum;
-        ce_out <= 1'b1;
-      end else begin
-        ce_out <= 1'b0;
-      end
+	  ce_out <= ready;
+	end
+  end
+
+  always @(posedge clk) begin
+    if (ready == 1'b1) begin
+      filter_out <= sum;
     end
   end
 
