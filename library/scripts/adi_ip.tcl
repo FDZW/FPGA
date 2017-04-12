@@ -109,8 +109,8 @@ proc adi_ip_properties {ip_name} {
   ipx::infer_bus_interface s_axi_aclk xilinx.com:signal:clock_rtl:1.0 [ipx::current_core]
   ipx::infer_bus_interface s_axi_aresetn xilinx.com:signal:reset_rtl:1.0 [ipx::current_core]
 
-  set raddr_width [expr [get_property SIZE_LEFT [ipx::get_ports s_axi_araddr -of_objects [ipx::current_core]]] + 1]
-  set waddr_width [expr [get_property SIZE_LEFT [ipx::get_ports s_axi_awaddr -of_objects [ipx::current_core]]] + 1]
+  set raddr_width [expr [get_property SIZE_LEFT [ipx::get_ports -nocase true s_axi_araddr -of_objects [ipx::current_core]]] + 1]
+  set waddr_width [expr [get_property SIZE_LEFT [ipx::get_ports -nocase true s_axi_awaddr -of_objects [ipx::current_core]]] + 1]
 
   if {$raddr_width != $waddr_width} {
     puts [format "WARNING: AXI address width mismatch for %s (r=%d, w=%d)" $ip_name $raddr_width, $waddr_width]
